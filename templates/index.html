@@ -29,6 +29,8 @@
 
     <script>
         const userId = "{{ user_id }}";
+        const min_polling_wait = 500;
+        const max_polling_wait = 15000;
 
         async function submitSong() {
             const songName = document.getElementById('songInput').value;
@@ -106,10 +108,36 @@
                 songList.appendChild(li);
             }
           
-            if (songList.innerHTML == previouslist)
+            if (songList.innerHTML == previouslist) {
+              return 
+            }
+              
+          
+            
         }
 
-        setInterval(updateSongList, polling_wait);
+        
+        async function pollSongList() {
+          // Pull down the new song list, storing whether anything changed
+          songs_changed_p = updateSongList();
+          
+          if (songs_changed_p) {
+              // the song list changed, set the polling time to short
+              polling_wait = min_polling_wait;
+              }
+            } else {
+              // Nothing changed, take longer to poll next time
+              polling_wait = polling_wait * 2;
+            if (polling_wait > max_polling_wait) {
+                polling_wait = max_polling_wait;
+            
+            }
+          
+          setTimeout(pollSongList, polling_wait); 
+        }
+      
+        pollSongList();
+        // setInterval(updateSongList, polling_wait);
 
 
     </script>
