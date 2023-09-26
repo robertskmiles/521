@@ -1,1 +1,1 @@
-# Python Flask project
+# Group suggestions webapp thing

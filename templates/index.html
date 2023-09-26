@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song App</title>
+</head>
+<body>
+    <label>What do you suggest, user {{ user_id }}?</label>
+    <input type="text" id="songInput">
+    <button onclick="submitSong()">Submit</button>
+
+    <ul id="songList">
+        {% for song in songs %}
+        <li>
+            {{ song.song }}
+            <input type="checkbox" {% if song.song in user_submitted_songs %}checked{% endif %} onclick="toggleSong('{{ song.song }}')">
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        const userId = "{{ user_id }}";
+
+        async function submitSong() {
+            const songName = document.getElementById('songInput').value;
+            const response = await fetch('/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ song: songName, user_id: userId })
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                updateSongList();
+                songInput.value = '';  // Clear the text input
+                songInput.focus();     // Set focus back to the input
+            }
+        }
+
+
+        document.getElementById('songInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                submitSong();
+            }
+        });
+
+
+        async function toggleSong(songName) {
+            const response = await fetch('/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ song: songName, user_id: userId })
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                updateSongList();
+            }
+        }
+
+        async function updateSongList() {
+            const response = await fetch('/get_songs');
+            const songs = await response.json();
+
+            const songList = document.getElementById('songList');
+            songList.innerHTML = '';  // Clear the current list
+
+            for (const song of songs) {
+                const li = document.createElement('li');
+
+                const songname_span = document.createElement('span');
+                songname_span.textContent = `${song.song} `;
+                li.appendChild(songname_span);
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                if (song.submitters.includes(userId)) {
+                    checkbox.checked = true;
+                }
+                checkbox.onclick = function() { toggleSong(song.song); };
+                li.appendChild(checkbox);
+
+                const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
+                const fans_span = document.createElement('span');
+                fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+                li.appendChild(fans_span);
+
+                songList.appendChild(li);
+            }
+        }
+
+        setInterval(updateSongList, 10000);
+
+
+    </script>
+</body>
+</html>

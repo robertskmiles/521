@@ -1,14 +1,66 @@
-from flask import Flask
-from flask import render_template
-from flask import request
-import model
+from flask import Flask, render_template, request, jsonify, make_response
+
+app = Flask(__name__, template_folder='templates')
+app.secret_key = 'secret_key'
+
+# In-memory storage
+songs = []  # List of songs: [{'song': 'Song Name', 'submitters': [user_id, ...]}, ...]
+user_id_counter = 0  # Counter to give each user a unique ID
+
+@app.route('/')
+def index():
+    global user_id_counter
+
+    print(request.cookies)
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        user_id_counter += 1
+        user_id = str(user_id_counter)
+
+    user_submitted_songs = [song['song'] for song in songs if user_id in song['submitters']]
+
+    response = make_response(render_template('index.html', songs=songs, user_submitted_songs=user_submitted_songs, user_id=user_id))
+    response.set_cookie('user_id', user_id, max_age=60*60*24)  # Set cookie to expire after 1 day
+
+    return response
+
+@app.route('/submit', methods=['POST'])
+def submit_song():
+    song_name = request.json.get('song')
+    user_id = request.json.get('user_id')
+
+    # Check if song already exists
+    song_entry = next((song for song in songs if song['song'] == song_name), None)
+
+    if song_entry:
+        if user_id not in song_entry['submitters']:
+            song_entry['submitters'].append(user_id)
+    else:
+        songs.append({'song': song_name, 'submitters': [user_id]})
+
+    return jsonify({'status': 'success'})
+
+@app.route('/toggle', methods=['POST'])
+def toggle_song():
+    song_name = request.json.get('song')
+    user_id = request.json.get('user_id')
+
+    # print(f"{user_id} toggled {song_name}")
+
+    song_entry = next((song for song in songs if song['song'] == song_name), None)
+    if song_entry:
+        if user_id in song_entry['submitters']:
+            song_entry['submitters'].remove(user_id)
+        else:
+            song_entry['submitters'].append(user_id)
+
+    return jsonify({'status': 'success'})
+
+@app.route('/get_songs', methods=['GET'])
+def get_songs():
+    sorted_songs = sorted(songs, key=lambda x: len(x['submitters']), reverse=True)
+    return jsonify(sorted_songs)
 
 
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-  return "Hello world!"
-  
-if __name__ == "__main__":
-  app.run()
+if __name__ == '__main__':
+    app.run(debug=True)
