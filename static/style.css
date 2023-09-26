@@ -6,6 +6,10 @@
     font-family: 'Arial', sans-serif;
 }
 
+a {
+    text-decoration: none;
+}
+
 body {
     background-color: #f3f4f6;
     padding: 40px;
@@ -80,7 +84,8 @@ input[type="checkbox"] {
     margin-right: 5px;   /* This provides spacing between checkbox and the fan count */
 }
 
-songname_span a {
+.songname_span {
+  background-color: #f00;
   text-decoration: none;
 }
 

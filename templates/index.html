@@ -129,8 +129,9 @@
     const youtubeLink = document.createElement('a');
     youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(song.song)}`;
     youtubeLink.target = '_blank';  // Open link in a new tab/window
+    youtubeLink.title = `Search for song on YouTube`;
 
-    const youtubeIcon = document.createTextNode('▶️');
+    const youtubeIcon = document.createTextNode(' ▶️ ');
     youtubeLink.appendChild(youtubeIcon);
 
     songname_span.appendChild(youtubeLink);
@@ -140,8 +141,9 @@
     const chordsLink = document.createElement('a');
     chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(song.song + " chords")}`;
     chordsLink.target = '_blank';  // Open link in a new tab/window
-
-    const chordsIcon = document.createTextNode('🎸');
+    chordsLink.title = `Search for chords on Google`;
+            
+    const chordsIcon = document.createTextNode(' 🎸 ');
     chordsLink.appendChild(chordsIcon);
 
     songname_span.appendChild(chordsLink);
