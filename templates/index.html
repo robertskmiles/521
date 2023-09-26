@@ -6,10 +6,10 @@
     <title>V-ii-I</title>
 </head>
 <body>
-    <label>Jam ID:</label>
+    <label>Group ID:</label>
   <input type="text" id="jamIdInput" value="default"></br>
   
-    <label>What do you suggest, user {{ user_id }}?</label>
+  <label>What do you suggest, user {{ user_id }}?</label></br>
     <input type="text" id="songInput">
     <button onclick="submitSong()">Submit</button>
 
@@ -21,6 +21,11 @@
         </li>
         {% endfor %}
     </ul>
+
+
+<p>
+  A Robertskmiles (and ChatGPT) project
+</p>
 
     <script>
         const userId = "{{ user_id }}";
