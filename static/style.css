@@ -1,0 +1,78 @@
+/* Reset some default margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f3f4f6;
+    padding: 40px;
+    color: #333;
+}
+
+h1 {
+    color: #4a90e2;
+    margin-bottom: 20px;
+}
+
+label, input, button {
+    margin-bottom: 10px;
+}
+
+input[type="text"], button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 300px;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+button {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #357ab7;
+}
+
+ul {
+    list-style-type: none;
+    margin-top: 20px;
+}
+
+
+li {
+    background-color: #fff;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: grid;  /* Changed to grid */
+    grid-template-columns: 1fr auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
+    align-items: center;
+    gap: 10px;  /* spacing between grid items */
+}
+
+li span {
+    color: #555;
+}
+
+input[type="checkbox"] {
+    margin-right: 5px;   /* This provides spacing between checkbox and the fan count */
+}
+
+
+p {
+    margin-top: 40px;
+    color: #888;
+}

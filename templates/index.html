@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="static/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>V-ii-I</title>
 </head>
 <body>
+  <div class="input-container">
     <label>Group ID:</label>
   <input type="text" id="jamIdInput" value="default"><br>
   
@@ -22,7 +24,7 @@
         {% endfor %}
     </ul>
 
-
+  </div>
 <p>
   A Rob Miles (well, ChatGPT) project
 </p>
@@ -87,28 +89,57 @@
           
             songList.innerHTML = '';  // Clear the current list
 
-            for (const song of songs) {
-                const li = document.createElement('li');
+//             for (const song of songs) {
+//                 const li = document.createElement('li');
 
-                const songname_span = document.createElement('span');
-                songname_span.textContent = `${song.song} `;
-                li.appendChild(songname_span);
+//                 const songname_span = document.createElement('span');
+//                 songname_span.textContent = `${song.song} `;
+//                 li.appendChild(songname_span);
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                if (song.submitters.includes(userId)) {
-                    checkbox.checked = true;
-                }
-                checkbox.onclick = function() { toggleSong(song.song); };
-                li.appendChild(checkbox);
+//                 const checkboxDiv = document.createElement('div');
+//                 checkboxDiv.className = 'checkbox-container';
 
-                const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
-                const fans_span = document.createElement('span');
-                fans_span.textContent = `(${song.submitters.length} ${fanText})`;
-                li.appendChild(fans_span);
+//                 const checkbox = document.createElement('input');
+//                 checkbox.type = 'checkbox';
+//                 if (song.submitters.includes(userId)) {
+//                     checkbox.checked = true;
+//                 }
+//                 checkbox.onclick = function() { toggleSong(song.song); };
+//                 checkboxDiv.appendChild(checkbox);
 
-                songList.appendChild(li);
-            }
+//                 const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
+//                 const fans_span = document.createElement('span');
+//                 fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+//                 checkboxDiv.appendChild(fans_span);
+
+//                 li.appendChild(checkboxDiv);
+
+//                 songList.appendChild(li);
+//             }
+          
+          for (const song of songs) {
+    const li = document.createElement('li');
+
+    const songname_span = document.createElement('span');
+    songname_span.textContent = `${song.song} `;
+    li.appendChild(songname_span);
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    if (song.submitters.includes(userId)) {
+        checkbox.checked = true;
+    }
+    checkbox.onclick = function() { toggleSong(song.song); };
+    li.appendChild(checkbox);
+
+    const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
+    const fans_span = document.createElement('span');
+    fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+    li.appendChild(fans_span);
+
+    songList.appendChild(li);
+}
+
           
             if (songList.innerHTML === previousList) {
               return false;
