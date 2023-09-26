@@ -52,7 +52,10 @@ def toggle_song():
     song_name = request.json.get('song')
     user_id = request.json.get('user_id')
 
-    # print(f"{user_id} toggled {song_name}")
+    print(user_id, "toggled", song_name)
+    # Check if this is a new jam, make it if so
+    if not songs.get(jam_id, None):
+      songs[jam_id] = []
 
     song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
     if song_entry:

@@ -77,6 +77,10 @@
             const songs = await response.json();
 
             const songList = document.getElementById('songList');
+          
+            //store the old list for comparison later
+            previousList = songList.innerHTML;
+          
             songList.innerHTML = '';  // Clear the current list
 
             for (const song of songs) {
@@ -101,9 +105,11 @@
 
                 songList.appendChild(li);
             }
+          
+            if (songList.innerHTML == previouslist)
         }
 
-        setInterval(updateSongList, 10000);
+        setInterval(updateSongList, polling_wait);
 
 
     </script>
