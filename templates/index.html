@@ -121,9 +121,30 @@
     const li = document.createElement('li');
 
     const songname_span = document.createElement('span');
-    songname_span.textContent = `${song.song} `;
+    songname_span.textContent = `${song.song}     `;
     li.appendChild(songname_span);
+    
+    
+    // Create YouTube search link
+    const youtubeLink = document.createElement('a');
+    youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(song.song)}`;
+    youtubeLink.target = '_blank';  // Open link in a new tab/window
+
+    const youtubeIcon = document.createTextNode('▶️');
+    youtubeLink.appendChild(youtubeIcon);
+
+    songname_span.appendChild(youtubeLink);
+    
             
+                // Create chord search link
+    const chordsLink = document.createElement('a');
+    chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(song.song + " chords")}`;
+    chordsLink.target = '_blank';  // Open link in a new tab/window
+
+    const chordsIcon = document.createTextNode('🎸');
+    chordsLink.appendChild(chordsIcon);
+
+    songname_span.appendChild(chordsLink);
             
     const checkboxDiv = document.createElement('div');
     checkboxDiv.className = 'checkbox-container';

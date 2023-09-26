@@ -58,7 +58,7 @@ li {
     margin-bottom: 10px;
     border-radius: 5px;
     display: grid;  /* Changed to grid */
-    grid-template-columns: 1fr auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
+    grid-template-columns: 1fr 1fr auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
     align-items: center;
     gap: 10px;  /* spacing between grid items */
 }
@@ -80,6 +80,9 @@ input[type="checkbox"] {
     margin-right: 5px;   /* This provides spacing between checkbox and the fan count */
 }
 
+songname_span a {
+  text-decoration: none;
+}
 
 p {
     margin-top: 40px;
