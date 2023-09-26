@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song App</title>
+    <title>V-ii-I</title>
 </head>
 <body>
+    <label>Jam ID:</label>
+    <input type="text" id="jamIdInput" value="default">
+    <button onclick="switchJam()">Switch Jam</button>
+  
     <label>What do you suggest, user {{ user_id }}?</label>
     <input type="text" id="songInput">
     <button onclick="submitSong()">Submit</button>
@@ -57,6 +61,14 @@
             if (data.status === 'success') {
                 updateSongList();
             }
+        }
+      
+        function switchJam() {
+            updateSongList();
+        }
+
+        function getCurrentJamId() {
+            return document.getElementById('jamIdInput').value;
         }
 
         async function updateSongList() {
