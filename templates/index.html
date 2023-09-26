@@ -123,6 +123,10 @@
     const songname_span = document.createElement('span');
     songname_span.textContent = `${song.song} `;
     li.appendChild(songname_span);
+            
+            
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.className = 'checkbox-container';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -130,11 +134,13 @@
         checkbox.checked = true;
     }
     checkbox.onclick = function() { toggleSong(song.song); };
-    li.appendChild(checkbox);
+    checkboxDiv.appendChild(checkbox);
+    li.appendChild(checkboxDiv);
 
     const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
     const fans_span = document.createElement('span');
     fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+    fans_span.className = 'fans-span';
     li.appendChild(fans_span);
 
     songList.appendChild(li);

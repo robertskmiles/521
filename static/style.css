@@ -67,6 +67,15 @@ li span {
     color: #555;
 }
 
+.checkbox-container {
+}
+
+.fans-span {
+  width:3.5em;
+  align-items: center;
+  text-align:center;
+}
+
 input[type="checkbox"] {
     margin-right: 5px;   /* This provides spacing between checkbox and the fan count */
 }
