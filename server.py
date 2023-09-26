@@ -48,7 +48,7 @@ def submit_song():
 
 @app.route('/toggle', methods=['POST'])
 def toggle_song():
-    jam_id = request.args.get('jam_id', 'default')
+    jam_id = request.json.get('jam_id')
     song_name = request.json.get('song')
     user_id = request.json.get('user_id')
 
