@@ -27,7 +27,7 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit_song():
-    jam_id = request.args.get('jam_id', 'default')
+    jam_id = request.json.get('jam_id')
     song_name = request.json.get('song')
     user_id = request.json.get('user_id')
     
@@ -54,7 +54,7 @@ def toggle_song():
 
     # print(f"{user_id} toggled {song_name}")
 
-    song_entry = next((song for song in songs if song['song'] == song_name), None)
+    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
     if song_entry:
         if user_id in song_entry['submitters']:
             song_entry['submitters'].remove(user_id)
@@ -66,6 +66,12 @@ def toggle_song():
 @app.route('/get_songs', methods=['GET'])
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')
+    print(jam_id, songs)
+    
+    # Check if this is a new jam, make it if so
+    if not songs.get(jam_id, None):
+      songs[jam_id] = []
+      
     sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
     return jsonify(sorted_songs)
 

@@ -7,8 +7,7 @@
 </head>
 <body>
     <label>Jam ID:</label>
-    <input type="text" id="jamIdInput" value="default">
-    <button onclick="switchJam()">Switch Jam</button>
+  <input type="text" id="jamIdInput" value="default"></br>
   
     <label>What do you suggest, user {{ user_id }}?</label>
     <input type="text" id="songInput">
@@ -31,7 +30,7 @@
             const response = await fetch('/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jam: getJamId(), song: songName, user_id: userId })
+                body: JSON.stringify({ jam_id: getJamId(), song: songName, user_id: userId })
             });
 
             const data = await response.json();
@@ -63,10 +62,6 @@
             }
         }
       
-        function switchJam() {
-            updateSongList();
-        }
-
         function getJamId() {
             return document.getElementById('jamIdInput').value;
         }
