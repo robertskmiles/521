@@ -20,9 +20,8 @@ body {
     font-family: Arial, sans-serif;  /* Use a standard web font. Adjust as needed. */
     position: relative;
     min-height: 100vh;  /* Ensure full viewport height */
-/*     padding-bottom: 100px;  /* Adjusted space at the bottom for the footer */ */
   
-    overflow-y: auto;  /* Only show a scrollbar when necessary */
+/*     overflow-y: auto;  /* Only show a scrollbar when necessary */ */
 }
 
 h1 {
@@ -59,19 +58,7 @@ button:hover {
     background-color: #357ab7;
 }
 
-/* Style the submit button */
-#submitBtn {
-  padding: 5px 10px;
-  font-size: 14px; 
-/*   position: absolute; */
-  right: 0;
-  top: 0;
-}
 
-/* Adjust text input padding to make room for button */  
-#songInput {
-  padding-right: 100px; 
-}
 
 
 ul {
