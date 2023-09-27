@@ -191,7 +191,7 @@
 
             } else {
               // Nothing changed, take longer to poll next time
-              polling_wait = polling_wait * 2;
+              polling_wait = polling_wait * 1.5;
               if (polling_wait > max_polling_wait) {
                 polling_wait = max_polling_wait;
               }
