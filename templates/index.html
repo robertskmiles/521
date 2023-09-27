@@ -7,14 +7,14 @@
     <title>V-ii-I</title>
 </head>
 <body>
-  <div class="input-container">
-    <label>Group ID:</label>
-  <input type="text" id="jamIdInput" value="default">
-  
+  <h1>V-ii-I</h1>
   <label>What do you suggest?</label><br>
     <input type="text" id="songInput">
     <button onclick="submitSong()">Submit</button>
 
+    <p>
+      Check the box for each you like:
+  </p>
     <ul id="songList">
         {% for song in songs %}
         <li>
@@ -24,11 +24,17 @@
         {% endfor %}
     </ul>
 
+  <div class="input-container">
+    <label>Group ID:</label>
+  <input type="text" id="jamIdInput" value="default">
+    
   </div>
-<p>
+<div class="footer">  
+  <p>
   A Rob Miles (well, ChatGPT) project
 </p>
-
+</div>
+  
     <script>
         const userId = "{{ user_id }}";
         const min_polling_wait = 750; //1s
