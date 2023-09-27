@@ -59,6 +59,21 @@ button:hover {
     background-color: #357ab7;
 }
 
+/* Style the submit button */
+#submitBtn {
+  padding: 5px 10px;
+  font-size: 14px; 
+/*   position: absolute; */
+  right: 0;
+  top: 0;
+}
+
+/* Adjust text input padding to make room for button */  
+#songInput {
+  padding-right: 100px; 
+}
+
+
 ul {
     list-style-type: none;
     margin-top: 20px;
