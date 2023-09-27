@@ -14,6 +14,15 @@ body {
     background-color: #f3f4f6;
     padding: 40px;
     color: #333;
+  
+  
+    margin: 0;
+    font-family: Arial, sans-serif;  /* Use a standard web font. Adjust as needed. */
+    position: relative;
+    min-height: 100vh;  /* Ensure full viewport height */
+    padding-bottom: 0px;  /* Adjusted space at the bottom for the footer */
+  
+    overflow-y: auto;  /* Only show a scrollbar when necessary */
 }
 
 h1 {
@@ -89,7 +98,19 @@ input[type="checkbox"] {
   text-decoration: none;
 }
 
-div#footer {
-    margin-top: 40px;
-    color: #888;
+.footer {
+    position: absolute;  /* Position the footer at the bottom */
+    bottom: 0;
+    width: 90%;
+    height: 30px;  /* Set the height of the footer */
+    background-color: #f1f1f1;  /* A light grey background */
+    text-align: center;  /* Center the text */
+    border-top: 1px solid #e0e0e0;  /* A subtle top border */
+}
+
+.footer p {
+    padding: 7px 0;  /* Add padding to center the text vertically */
+    margin: 0;  /* Remove default margins */
+    color: #333;  /* A darker text color for contrast */
+    font-size: 14px;  /* Adjust font size */
 }
