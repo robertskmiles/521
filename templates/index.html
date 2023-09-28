@@ -42,6 +42,33 @@
         const min_polling_wait = 750; //1s
         const max_polling_wait = 20000; //20s
 
+        let jamIdTimer;      
+        let listSortTimer;
+   
+        // Check if there's a saved value when the page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem("jamId")) {
+                document.getElementById("jamIdInput").value = localStorage.getItem("jamId");
+            }
+        });
+
+        // Listen for changes in the text box
+        document.getElementById("jamIdInput").addEventListener("input", function() {
+            localStorage.setItem("jamId", this.value);
+          
+            // Whenever the jamid changes, reset a timer
+            // so we can refresh the list shortly afterwards
+            clearTimeout(jamIdTimer);
+
+            // Set a new timer
+            jamIdTimer = setTimeout(() => {
+                updateSongList();
+            }, 500);
+        });
+      
+      
+      
+      
         async function submitSong() {
             const songName = document.getElementById('songInput').value;
             const response = await fetch('/submit', {
@@ -76,6 +103,15 @@
 
             const data = await response.json();
             if (data.status === 'success') {
+                          // Whenever the jamid changes, reset a timer
+            // so we can refresh the list shortly afterwards
+            clearTimeout(jamIdTimer);
+
+            // Set a new timer
+            jamIdTimer = setTimeout(() => {
+                updateSongList();
+            }, 500);
+              
                 updateSongList();
                 polling_wait = min_polling_wait;
             }
@@ -209,6 +245,8 @@
         }
       
         pollSongList();
+      
+    
 
 
     </script>
