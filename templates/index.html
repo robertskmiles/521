@@ -103,16 +103,12 @@
 
             const data = await response.json();
             if (data.status === 'success') {
-                          // Whenever the jamid changes, reset a timer
-            // so we can refresh the list shortly afterwards
-            clearTimeout(jamIdTimer);
-
-            // Set a new timer
-            jamIdTimer = setTimeout(() => {
-                updateSongList();
-            }, 500);
+                // Don't resort everything immediately, wait a second for the user to stop clicking
+                clearTimeout(listSortTimer);
+                listSortTimer = setTimeout(() => {
+                    updateSongList();
+                }, 1000);
               
-                updateSongList();
                 polling_wait = min_polling_wait;
             }
         }
