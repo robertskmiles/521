@@ -107,7 +107,7 @@
                 clearTimeout(listSortTimer);
                 listSortTimer = setTimeout(() => {
                     updateSongList();
-                }, 1000);
+                }, 2000);
               
                 polling_wait = min_polling_wait;
             }
@@ -177,7 +177,7 @@
     songname_span.appendChild(youtubeLink);
     
             
-                // Create chord search link
+    // Create chord search link
     const chordsLink = document.createElement('a');
     chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(song.song + " chords")}`;
     chordsLink.target = '_blank';  // Open link in a new tab/window
