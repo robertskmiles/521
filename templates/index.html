@@ -39,7 +39,7 @@
   
     <script>
         const userId = "{{ user_id }}";
-        const min_polling_wait = 750; //1s
+        const min_polling_wait = 3000; //1s
         const max_polling_wait = 20000; //20s
 
         let jamIdTimer;      
@@ -63,7 +63,7 @@
             // Set a new timer
             jamIdTimer = setTimeout(() => {
                 updateSongList();
-            }, 500);
+            }, 1000);
         });
       
       
