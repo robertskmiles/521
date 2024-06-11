@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-ii-I</title>
+</head>
+<body>
+  <h1>V-ii-I</h1>
+  <div id="submitform">  
+    <input type="text" id="songInput" placeholder="Type suggestions here">
+    <button onclick="submitSong()" id="submitBtn">Submit</button>
+  </div>
+  
+  
+    <p>
+      Check the box for each you like:
+  </p>
+    <ul id="songList">
+        {% for song in songs %}
+        <li>
+            {{ song.song }}
+            <input type="checkbox" {% if song.song in user_submitted_songs %}checked{% endif %} onclick="toggleSong('{{ song.song }}')">
+        </li>
+        {% endfor %}
+    </ul>
+
+  <div class="input-container">
+    <label>Group ID:</label>
+  <input type="text" id="jamIdInput" value="default">
+    
+  </div>
+<div class="footer">  
+  <p>
+  A Rob Miles (well, ChatGPT) project
+</p>
+</div>
+  
+    <script>
+        const userId = "{{ user_id }}";
+        const min_polling_wait = 3000; //1s
+        const max_polling_wait = 20000; //20s
+
+        let jamIdTimer;      
+        let listSortTimer;
+   
+        // Check if there's a saved value when the page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem("jamId")) {
+                document.getElementById("jamIdInput").value = localStorage.getItem("jamId");
+            }
+        });
+
+        // Listen for changes in the text box
+        document.getElementById("jamIdInput").addEventListener("input", function() {
+            localStorage.setItem("jamId", this.value);
+          
+            // Whenever the jamid changes, reset a timer
+            // so we can refresh the list shortly afterwards
+            clearTimeout(jamIdTimer);
+
+            // Set a new timer
+            jamIdTimer = setTimeout(() => {
+                updateSongList();
+            }, 1000);
+        });
+      
+      
+      
+      
+        async function submitSong() {
+            const songName = document.getElementById('songInput').value;
+            const response = await fetch('/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jam_id: getJamId(), song: songName, user_id: userId })
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                updateSongList();
+                songInput.value = '';  // Clear the text input
+                songInput.focus();     // Set focus back to the input
+                polling_wait = min_polling_wait;  // reset the polling wait time
+            }
+        }
+
+
+        document.getElementById('songInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                submitSong();
+            }
+        });
+
+
+        async function toggleSong(songName) {
+            const response = await fetch('/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jam_id: getJamId(), song: songName, user_id: userId })
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                // Don't resort everything immediately, wait a second for the user to stop clicking
+                clearTimeout(listSortTimer);
+                listSortTimer = setTimeout(() => {
+                    updateSongList();
+                }, 2000);
+              
+                polling_wait = min_polling_wait;
+            }
+        }
+      
+        function getJamId() {
+            return document.getElementById('jamIdInput').value;
+        }
+
+        async function updateSongList() {
+            const jamId = getJamId();
+            const response = await fetch(`/get_songs?jam_id=${jamId}`);
+            const songs = await response.json();
+
+            const songList = document.getElementById('songList');
+          
+            //store the old list for comparison later
+            previousList = songList.innerHTML;
+          
+            songList.innerHTML = '';  // Clear the current list
+
+//             for (const song of songs) {
+//                 const li = document.createElement('li');
+
+//                 const songname_span = document.createElement('span');
+//                 songname_span.textContent = `${song.song} `;
+//                 li.appendChild(songname_span);
+
+//                 const checkboxDiv = document.createElement('div');
+//                 checkboxDiv.className = 'checkbox-container';
+
+//                 const checkbox = document.createElement('input');
+//                 checkbox.type = 'checkbox';
+//                 if (song.submitters.includes(userId)) {
+//                     checkbox.checked = true;
+//                 }
+//                 checkbox.onclick = function() { toggleSong(song.song); };
+//                 checkboxDiv.appendChild(checkbox);
+
+//                 const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
+//                 const fans_span = document.createElement('span');
+//                 fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+//                 checkboxDiv.appendChild(fans_span);
+
+//                 li.appendChild(checkboxDiv);
+
+//                 songList.appendChild(li);
+//             }
+          
+          for (const song of songs) {
+    const li = document.createElement('li');
+
+    const songname_span = document.createElement('span');
+    songname_span.textContent = `${song.song}     `;
+    li.appendChild(songname_span);
+    
+    
+    // Create YouTube search link
+    const youtubeLink = document.createElement('a');
+    youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(song.song)}`;
+    youtubeLink.target = '_blank';  // Open link in a new tab/window
+    youtubeLink.title = `Search for song on YouTube`;
+
+    const youtubeIcon = document.createTextNode(' ▶️ ');
+    youtubeLink.appendChild(youtubeIcon);
+
+    songname_span.appendChild(youtubeLink);
+    
+            
+    // Create chord search link
+    const chordsLink = document.createElement('a');
+    chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(song.song + " chords")}`;
+    chordsLink.target = '_blank';  // Open link in a new tab/window
+    chordsLink.title = `Search for chords on Google`;
+            
+    const chordsIcon = document.createTextNode(' 🎸 ');
+    chordsLink.appendChild(chordsIcon);
+
+    songname_span.appendChild(chordsLink);
+            
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.className = 'checkbox-container';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    if (song.submitters.includes(userId)) {
+        checkbox.checked = true;
+    }
+    checkbox.onclick = function() { toggleSong(song.song); };
+    checkboxDiv.appendChild(checkbox);
+    li.appendChild(checkboxDiv);
+
+    const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
+    const fans_span = document.createElement('span');
+    fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+    fans_span.className = 'fans-span';
+    li.appendChild(fans_span);
+
+    songList.appendChild(li);
+}
+
+          
+            if (songList.innerHTML === previousList) {
+              return false;
+            } else {
+              return true;
+            }
+              
+          
+            
+        }
+
+        
+        async function pollSongList() {
+          // Pull down the new song list, storing whether anything changed
+          songs_changed_p = await updateSongList();
+          
+          if (songs_changed_p) {
+              // the song list changed, set the polling time to short
+              polling_wait = min_polling_wait;
+
+            } else {
+              // Nothing changed, take longer to poll next time
+              polling_wait = polling_wait * 1.5;
+              if (polling_wait > max_polling_wait) {
+                polling_wait = max_polling_wait;
+              }
+            }
+          console.log(polling_wait, songs_changed_p);
+          setTimeout(pollSongList, polling_wait); 
+        }
+      
+        pollSongList();
+      
+    
+
+
+    </script>
+</body>
+</html>
