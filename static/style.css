@@ -1,0 +1,121 @@
+/* Reset some default margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+a {
+    text-decoration: none;
+}
+
+body {
+    background-color: #f3f4f6;
+    padding: 40px;
+    color: #333;
+  
+  
+    margin: 0;
+    font-family: Arial, sans-serif;  /* Use a standard web font. Adjust as needed. */
+    position: relative;
+    min-height: 100vh;  /* Ensure full viewport height */
+  
+/*     overflow-y: auto;  /* Only show a scrollbar when necessary */ */
+}
+
+h1 {
+    color: #4a90e2;
+    margin-bottom: 20px;
+}
+
+label, input, button {
+    margin-bottom: 10px;
+}
+
+input[type="text"], button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 300px;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+button {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #357ab7;
+}
+
+
+
+
+ul {
+    list-style-type: none;
+    margin-top: 20px;
+}
+
+
+li {
+    background-color: #fff;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: grid;  /* Changed to grid */
+    grid-template-columns: 1fr auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
+    align-items: center;
+    gap: 10px;  /* spacing between grid items */
+}
+
+li span {
+    color: #555;
+}
+
+.checkbox-container {
+  
+}
+
+.fans-span {
+  width:3.5em;
+  align-items: center;
+  text-align:center;
+}
+
+input[type="checkbox"] {
+    margin: 5px;   /* This provides spacing between checkbox and the fan count */
+  
+/*     padding: 7px 0;  /* Add padding to center the text vertically */ */
+}
+
+.songname_span {
+  background-color: #f00;
+  text-decoration: none;
+}
+
+.footer {
+    position: absolute;  /* Position the footer at the bottom */
+    bottom: 0;
+    width: 90%;
+    height: 40px;  /* Set the height of the footer */
+    background-color: #f1f1f1;  /* A light grey background */
+    text-align: center;  /* Center the text */
+    border-top: 1px solid #e0e0e0;  /* A subtle top border */
+}
+
+.footer p {
+    padding: 7px 0;  /* Add padding to center the text vertically */
+    margin: 0;  /* Remove default margins */
+    color: #333;  /* A darker text color for contrast */
+    font-size: 14px;  /* Adjust font size */
+}
