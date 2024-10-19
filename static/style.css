@@ -6,6 +6,14 @@
     font-family: 'Arial', sans-serif;
 }
 
+#qr {
+    position: absolute;
+    top: 20px; /* Adjust the distance from the top */
+    right: 20px; /* Adjust the distance from the right */
+    width: 183px; /* Set the desired width for the QR code */
+    height: auto; /* Ensure the height adjusts proportionally */
+}
+
 a {
     text-decoration: none;
 }
@@ -13,7 +21,7 @@ a {
 body {
     background-color: #f3f4f6;
     padding: 40px;
-    color: #333;
+    color: #333333;
   
   
     margin: 0;
@@ -21,7 +29,7 @@ body {
     position: relative;
     min-height: 100vh;  /* Ensure full viewport height */
   
-/*     overflow-y: auto;  /* Only show a scrollbar when necessary */ */
+/*     overflow-y: auto;  /* Only show a scrollbar when necessary */
 }
 
 h1 {
@@ -36,7 +44,7 @@ label, input, button {
 input[type="text"], button {
     padding: 10px 15px;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc;
     width: 100%;
     max-width: 300px;
 }
@@ -48,7 +56,7 @@ input[type="text"]:focus {
 
 button {
     background-color: #4a90e2;
-    color: #fff;
+    color: #ffffff;
     border: none;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -68,7 +76,7 @@ ul {
 
 
 li {
-    background-color: #fff;
+    background-color: #ffffff;
     padding: 10px 15px;
     margin-bottom: 10px;
     border-radius: 5px;
@@ -79,12 +87,14 @@ li {
 }
 
 li span {
-    color: #555;
+    color: #555555;
 }
 
+/*
 .checkbox-container {
   
 }
+*/
 
 .fans-span {
   width:3.5em;
@@ -95,11 +105,11 @@ li span {
 input[type="checkbox"] {
     margin: 5px;   /* This provides spacing between checkbox and the fan count */
   
-/*     padding: 7px 0;  /* Add padding to center the text vertically */ */
+/*     padding: 7px 0;  /* Add padding to center the text vertically */
 }
 
 .songname_span {
-  background-color: #f00;
+  background-color: #ff0000;
   text-decoration: none;
 }
 
@@ -116,6 +126,6 @@ input[type="checkbox"] {
 .footer p {
     padding: 7px 0;  /* Add padding to center the text vertically */
     margin: 0;  /* Remove default margins */
-    color: #333;  /* A darker text color for contrast */
+    color: #333333;  /* A darker text color for contrast */
     font-size: 14px;  /* Adjust font size */
 }
