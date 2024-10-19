@@ -7,12 +7,19 @@
 }
 
 #qr {
-    position: absolute;
-    top: 20px; /* Adjust the distance from the top */
-    right: 20px; /* Adjust the distance from the right */
-    width: 183px; /* Set the desired width for the QR code */
-    height: auto; /* Ensure the height adjusts proportionally */
+    position: fixed;
+    bottom: 60px; /* Positions it above the footer */
+    right: 40px;
+    width: 183px; /* Adjust size as needed */
+    height: auto;
+    z-index: 100;
 }
+
+/* Adjust the footer to match the body padding */
+.footer {
+    padding-right: 200px;
+}
+
 
 a {
     text-decoration: none;
@@ -20,7 +27,8 @@ a {
 
 body {
     background-color: #f3f4f6;
-    padding: 40px;
+    /*padding: 40px;*/
+    padding: 40px 200px 100px 40px;
     color: #333333;
   
   
