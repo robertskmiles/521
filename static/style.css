@@ -15,11 +15,6 @@
     z-index: 100;
 }
 
-/* Adjust the footer to match the body padding */
-.footer {
-    padding-right: 200px;
-}
-
 
 a {
     text-decoration: none;
@@ -27,8 +22,8 @@ a {
 
 body {
     background-color: #f3f4f6;
-    /*padding: 40px;*/
-    padding: 40px 200px 100px 40px;
+    /*leave space at the bottom for the QR code*/
+    padding: 40px 40px 230px 40px; /* top right bottom left */
     color: #333333;
   
   
