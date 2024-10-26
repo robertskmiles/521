@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, make_response
+import qrcode
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret_key'
