@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, make_response
 import qrcode
+import os
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret_key'
@@ -7,6 +8,11 @@ app.secret_key = 'secret_key'
 # In-memory storage
 songs = {'default':[]}
 user_id_counter = 0  # Counter to give each user a unique ID
+
+qr_cache_dir = os.path.join('static', 'qr')
+# Ensure the cache directory exists
+if not os.path.exists(qr_cache_dir):
+  os.makedirs(qr_cache_dir)
 
 @app.route('/')
 def index():
@@ -80,6 +86,26 @@ def get_songs():
     return jsonify(sorted_songs)
 
 
+
+@app.route('/qr/<string:jam_id>.png')
+def generate_qr(jam_id):
+    # Create the QR code URL
+    url = 'https://521.glitch.me/{}'.format(jam_id)
+    qr_filename = '{}.png'.format(jam_id)
+    qr_filepath = os.path.join(qr_cache_dir, qr_filename)
+
+    # Check if the file already exists
+    if not os.path.exists(qr_filepath):
+        # Generate a new QR code
+        qr = qrcode.make(url)
+        qr.save(qr_filepath)
+
+    try:
+        # Return the existing or newly generated QR code image
+        return send_file(qr_filepath, mimetype='image/png')
+    except Exception as e:
+        return e
+  
 if __name__ == '__main__':
     app.run(debug=True)
  
