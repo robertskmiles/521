@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response, send_file, abort
 import qrcode
 import os
 
@@ -104,7 +104,7 @@ def generate_qr(jam_id):
         # Return the existing or newly generated QR code image
         return send_file(qr_filepath, mimetype='image/png')
     except Exception as e:
-        return e
+        abort(404)
   
 if __name__ == '__main__':
     app.run(debug=True)
