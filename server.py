@@ -14,8 +14,10 @@ qr_cache_dir = os.path.join('static', 'qr')
 if not os.path.exists(qr_cache_dir):
   os.makedirs(qr_cache_dir)
 
+  
+@app.route('/<string:jam_id>')
 @app.route('/')
-def index():
+def index(jam_id="default"):
     global user_id_counter
 
     print(request.cookies)
@@ -84,8 +86,6 @@ def get_songs():
       
     sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
     return jsonify(sorted_songs)
-
-
 
 @app.route('/qr/<string:jam_id>.png')
 def generate_qr(jam_id):
