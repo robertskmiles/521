@@ -8,6 +8,9 @@
   </head>
   <body>
     <h1>V-ii-I</h1>
+    <h2>
+      {{jam_id}}
+    </h2>
 
     <div id="submitform">
       <input type="text" id="songInput" placeholder="Type suggestions here" />
@@ -35,10 +38,13 @@
       {% endfor %}
     </ul>
 
+    <!--
     <div class="input-container">
       <label>Group ID:</label>
       <input type="text" id="jamIdInput" value="default" />
     </div>
+    -->
+    
     <img
       id="qr"
       src="https://cdn.glitch.global/d960c301-4426-47ac-a1bb-0d288fdd69d2/521-qr.png?v=1729312506815"
@@ -52,9 +58,11 @@
       const min_polling_wait = 3000; //3s
       const max_polling_wait = 20000; //20s
 
-      let jamIdTimer;
+      // let jamIdTimer;
       let listSortTimer;
 
+      
+      /*
       // Check if there's a saved value when the page loads
       document.addEventListener("DOMContentLoaded", function () {
         if (localStorage.getItem("jamId")) {
@@ -62,7 +70,7 @@
             localStorage.getItem("jamId");
         }
       });
-
+      
       // Listen for changes in the text box
       document
         .getElementById("jamIdInput")
@@ -84,6 +92,9 @@
             updateSongList();
           }, 1000);
         });
+        
+        */
+      
 
       async function submitSong() {
         const songName = document.getElementById("songInput").value;
@@ -138,7 +149,8 @@
       }
 
       function getJamId() {
-        return document.getElementById("jamIdInput").value;
+        // return document.getElementById("jamIdInput").value;
+        return "{{ jam_id }}"
       }
 
       async function updateSongList() {
