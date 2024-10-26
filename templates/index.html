@@ -160,56 +160,56 @@
 //             }
           
     for (const song of songs) {
-    const li = document.createElement('li');
+      const li = document.createElement('li');
 
-    const songname_span = document.createElement('span');
-    songname_span.textContent = `${song.song}     `;
-    li.appendChild(songname_span);
-    
-    
-    // Create YouTube search link
-    const youtubeLink = document.createElement('a');
-    youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(song.song)}`;
-    youtubeLink.target = '_blank';  // Open link in a new tab/window
-    youtubeLink.title = `Search for song on YouTube`;
+      const songname_span = document.createElement('span');
+      songname_span.textContent = `${song.song}     `;
+      li.appendChild(songname_span);
 
-    const youtubeIcon = document.createTextNode(' ▶️ ');
-    youtubeLink.appendChild(youtubeIcon);
 
-    songname_span.appendChild(youtubeLink);
-    
-            
-    // Create chord search link
-    const chordsLink = document.createElement('a');
-    chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(song.song + " chords")}`;
-    chordsLink.target = '_blank';  // Open link in a new tab/window
-    chordsLink.title = `Search for chords on Google`;
-            
-    const chordsIcon = document.createTextNode(' 🎸 ');
-    chordsLink.appendChild(chordsIcon);
+      // Create YouTube search link
+      const youtubeLink = document.createElement('a');
+      youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(song.song)}`;
+      youtubeLink.target = '_blank';  // Open link in a new tab/window
+      youtubeLink.title = `Search for song on YouTube`;
 
-    songname_span.appendChild(chordsLink);
-            
-    const checkboxDiv = document.createElement('div');
-    checkboxDiv.className = 'checkbox-container';
+      const youtubeIcon = document.createTextNode(' ▶️ ');
+      youtubeLink.appendChild(youtubeIcon);
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    if (song.submitters.includes(userId)) {
-        checkbox.checked = true;
-    }
-    checkbox.onclick = function() { toggleSong(song.song); };
-    checkboxDiv.appendChild(checkbox);
-    li.appendChild(checkboxDiv);
+      songname_span.appendChild(youtubeLink);
 
-    const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
-    const fans_span = document.createElement('span');
-    fans_span.textContent = `(${song.submitters.length} ${fanText})`;
-    fans_span.className = 'fans-span';
-    li.appendChild(fans_span);
 
-    songList.appendChild(li);
-}
+      // Create chord search link
+      const chordsLink = document.createElement('a');
+      chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(song.song + " chords")}`;
+      chordsLink.target = '_blank';  // Open link in a new tab/window
+      chordsLink.title = `Search for chords on Google`;
+
+      const chordsIcon = document.createTextNode(' 🎸 ');
+      chordsLink.appendChild(chordsIcon);
+
+      songname_span.appendChild(chordsLink);
+
+      const checkboxDiv = document.createElement('div');
+      checkboxDiv.className = 'checkbox-container';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      if (song.submitters.includes(userId)) {
+          checkbox.checked = true;
+      }
+      checkbox.onclick = function() { toggleSong(song.song); };
+      checkboxDiv.appendChild(checkbox);
+      li.appendChild(checkboxDiv);
+
+      const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
+      const fans_span = document.createElement('span');
+      fans_span.textContent = `(${song.submitters.length} ${fanText})`;
+      fans_span.className = 'fans-span';
+      li.appendChild(fans_span);
+
+      songList.appendChild(li);
+  }
 
           
             if (songList.innerHTML === previousList) {
