@@ -41,7 +41,7 @@
   
     <script>
         const userId = "{{ user_id }}";
-        const min_polling_wait = 3000; //1s
+        const min_polling_wait = 3000; //3s
         const max_polling_wait = 20000; //20s
 
         let jamIdTimer;      
@@ -159,7 +159,7 @@
 //                 songList.appendChild(li);
 //             }
           
-          for (const song of songs) {
+    for (const song of songs) {
     const li = document.createElement('li');
 
     const songname_span = document.createElement('span');

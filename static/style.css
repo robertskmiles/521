@@ -6,13 +6,16 @@
     font-family: 'Arial', sans-serif;
 }
 
-#qr {
-    position: fixed;
-    bottom: 60px; /* Positions it above the footer */
-    right: 40px;
-    width: 183px; /* Adjust size as needed */
-    height: auto;
-    z-index: 100;
+
+@media only screen and (min-width: 750px) { /* Only float in the corner on bigger screens */
+  #qr {
+      position: fixed;
+      bottom: 60px; /* Positions it above the footer */
+      right: 40px;
+      width: 183px; /* Adjust size as needed */
+      height: auto;
+      z-index: 100;
+  }
 }
 
 
