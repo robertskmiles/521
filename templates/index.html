@@ -69,6 +69,12 @@
         .addEventListener("input", function () {
           localStorage.setItem("jamId", this.value);
 
+          //update the URL to reflect the new jam id
+          newUrl = "http://521.glitch.me/" + this.value;
+          if (window.location.pathname !== newUrl) {
+            window.history.pushState({}, "", newUrl);
+          }
+
           // Whenever the jamid changes, reset a timer
           // so we can refresh the list shortly afterwards
           clearTimeout(jamIdTimer);

@@ -21,15 +21,15 @@ def index(jam_id="default"):
     global user_id_counter
 
     print(request.cookies)
-    jam_id = request.args.get('jam_id', 'default')
+    # jam_id = request.args.get('jam_id', 'default')
     user_id = request.cookies.get('user_id')
     if not user_id:
         user_id_counter += 1
         user_id = str(user_id_counter)
 
-    user_submitted_songs = [song['song'] for song in songs[jam_id] if user_id in song['submitters']]
+    user_submitted_songs = [song['song'] for song in songs.get(jam_id, []) if user_id in song['submitters']]
 
-    response = make_response(render_template('index.html', songs=songs[jam_id], user_submitted_songs=user_submitted_songs, user_id=user_id))
+    response = make_response(render_template('index.html', jam_id=jam_id, songs=songs.get(jam_id, []), user_submitted_songs=user_submitted_songs, user_id=user_id))
     response.set_cookie('user_id', user_id, max_age=60*60*24)  # Set cookie to expire after 1 day
 
     return response
