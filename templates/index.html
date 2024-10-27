@@ -256,8 +256,8 @@
         }
 
         for (const song of songs) {
-          if (!song.default_hidden || song.showers.includes(userId)) {
-            const li = createSongLi(song);
+          if (!song.hiders.includes(userId)) {
+            const li = createSongLi(song, );
             songList.appendChild(li);
           }
         }
@@ -267,7 +267,7 @@
         songList2.innerHTML = ""; // Clear the current list
 
         for (const song of songs) {
-          if (song.default_hidden || song.hiders.includes(userId)) {
+          if (song.hiders.includes(userId)) {
             const li = createSongLi(song);
             songList2.appendChild(li);
           }

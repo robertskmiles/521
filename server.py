@@ -74,7 +74,45 @@ def toggle_song():
             song_entry['submitters'].append(user_id)
 
     return jsonify({'status': 'success'})
-  
+
+
+@app.route('/hide', methods=['POST'])
+def hide_song():
+    jam_id = request.json.get('jam_id')
+    song_name = request.json.get('song')
+    user_id = request.json.get('user_id')
+
+    print(user_id, "hid", song_name)
+    # Check if this is a new jam, make it if so
+    if not songs.get(jam_id, None):
+      songs[jam_id] = []
+
+    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
+    if song_entry:
+        if user_id not in song_entry['hiders']:
+            song_entry['hiders'].append(user_id)
+            
+    return jsonify({'status': 'success'})
+
+
+@app.route('/show', methods=['POST'])
+def show_song():
+    jam_id = request.json.get('jam_id')
+    song_name = request.json.get('song')
+    user_id = request.json.get('user_id')
+
+    print(user_id, "showed", song_name)
+    # Check if this is a new jam, make it if so
+    if not songs.get(jam_id, None):
+      songs[jam_id] = []
+      
+    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
+    if song_entry:
+        if user_id not in song_entry['showers']:
+            song_entry['showers'].append(user_id)
+            
+    return jsonify({'status': 'success'})
+
   
 @app.route('/togglehidden', methods=['POST'])
 def toggle_hidden():
