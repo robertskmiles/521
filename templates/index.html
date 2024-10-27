@@ -71,7 +71,7 @@
             localStorage.getItem("jamId");
         }
       });
-      
+
       // Listen for changes in the text box
       document
         .getElementById("jamIdInput")
@@ -93,7 +93,7 @@
             updateSongList();
           }, 1000);
         });
-        
+
         */
 
       async function submitSong() {
@@ -164,14 +164,10 @@
         console.log("hiding");
         console.log(data);
         if (data.status === "success") {
-          // Don't resort everything immediately, wait a second for the user to stop clicking
-          clearTimeout(listSortTimer);
-          listSortTimer = setTimeout(() => {
-            updateSongList();
-          }, 2000);
-
-          polling_wait = min_polling_wait;
+          updateSongList();
         }
+
+        polling_wait = min_polling_wait;
       }
 
       function getJamId() {

@@ -51,7 +51,7 @@ def submit_song():
         if user_id not in song_entry['submitters']:
             song_entry['submitters'].append(user_id)
     else:
-        songs[jam_id].append({'song': song_name, 'submitters': [user_id], 'hiders':[]})
+        songs[jam_id].append({'song': song_name, 'submitters': [user_id], 'hiders':[], 'showers':[]})
 
     return jsonify({'status': 'success'})
 
@@ -93,7 +93,17 @@ def toggle_hidden():
             song_entry['hiders'].remove(user_id)
         else:
             song_entry['hiders'].append(user_id)
+            
+        if user_id in song_entry['showers']:
+            song_entry['showers'].remove(user_id)
+        else:
+            song_entry['showers'].append(user_id)
 
+            
+        # decide whether to show this song by deault
+        
+        song_entry['default_hidden']
+            
     return jsonify({'status': 'success'})
 
   
