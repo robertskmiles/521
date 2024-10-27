@@ -93,17 +93,19 @@ def toggle_hidden():
             song_entry['hiders'].remove(user_id)
         else:
             song_entry['hiders'].append(user_id)
-            
-        if user_id in song_entry['showers']:
             song_entry['showers'].remove(user_id)
-        else:
+            
+        if user_id not in song_entry['showers']:
             song_entry['showers'].append(user_id)
+            song_entry['hiders'].remove(user_id)
+        else:
+            song_entry['showers'].remove(user_id)
 
             
         # decide whether to show this song by deault
         hiders = len(song_entry['hiders'])
         showers = len(song_entry['showers'])
-        
+        users = 
         # if most people have hidden it
         # (and hardly anyone has unhidden it)
         # then hide it by default for everyone

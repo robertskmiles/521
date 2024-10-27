@@ -179,7 +179,7 @@
         const jamId = getJamId();
         const response = await fetch(`/get_songs?jam_id=${jamId}`);
         const songs = await response.json();
-        console.log(songs);
+        console.log(JSON.stringify(songs));
 
         const songList = document.getElementById("songList");
 
