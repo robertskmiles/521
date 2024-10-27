@@ -256,7 +256,7 @@
         }
 
         for (const song of songs) {
-          if (!song.default_hidden && !song.hiders.includes(userId)) {
+          if (!song.default_hidden || song.showers.includes(userId)) {
             const li = createSongLi(song);
             songList.appendChild(li);
           }

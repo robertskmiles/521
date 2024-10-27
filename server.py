@@ -105,6 +105,11 @@ def toggle_hidden():
             song_entry['hiders'].remove(user_id)
         else:
             song_entry['hiders'].append(user_id)
+        
+        # if user_id in song_entry['showers']:
+        #     song_entry['showers'].remove(user_id)
+        # else:
+        #     song_entry['showers'].append(user_id)
             
         # decide whether to show this song by deault
         hiders = len(song_entry['hiders'])
