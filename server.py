@@ -96,6 +96,7 @@ def toggle_hidden():
 
     return jsonify({'status': 'success'})
 
+  
 @app.route('/get_songs', methods=['GET'])
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')

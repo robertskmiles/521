@@ -93,9 +93,20 @@ li {
     margin-bottom: 10px;
     border-radius: 5px;
     display: grid;  /* Changed to grid */
-    grid-template-columns: 1fr auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
+    grid-template-columns: 1fr auto auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
     align-items: center;
     gap: 10px;  /* spacing between grid items */
+}
+
+.hide-song-link {
+    margin-left: 10px;  /* Add spacing to keep it from touching the other content */
+    color: #ff0000;     /* Optional: Change color to red or whatever you prefer */
+    cursor: pointer;
+    text-decoration: none; /* Ensure the link doesn't have an underline */
+}
+
+.hide-song-link:hover {
+    text-decoration: underline;  /* Optionally add underline on hover */
 }
 
 li span {

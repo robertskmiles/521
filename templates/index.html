@@ -160,6 +160,9 @@
         });
 
         const data = await response.json();
+
+        console.log("hiding");
+        console.log(data);
         if (data.status === "success") {
           // Don't resort everything immediately, wait a second for the user to stop clicking
           clearTimeout(listSortTimer);
@@ -256,20 +259,22 @@
         }
 
         for (const song of songs) {
-          const li = createSongLi(song);
-          songList.appendChild(li);
+          if (!song.hiders.includes(userId)) {
+            const li = createSongLi(song);
+            songList.appendChild(li);
+          }
         }
 
-        //         const songList2 = document.getElementById("songList2");
+        const songList2 = document.getElementById("songList2");
 
-        //         songList2.innerHTML = ""; // Clear the current list
+        songList2.innerHTML = ""; // Clear the current list
 
-        //         for (const song of songs) {
-        //           if (!song.submitters.includes(userId)) {
-        //             const li = createSongLi(song);
-        //             songList2.appendChild(li);
-        //           }
-        //         }
+        for (const song of songs) {
+          if (song.hiders.includes(userId)) {
+            const li = createSongLi(song);
+            songList2.appendChild(li);
+          }
+        }
 
         if (songList.innerHTML === previousList) {
           return false;
