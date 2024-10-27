@@ -113,8 +113,7 @@ def toggle_hidden():
         # if most people have hidden it
         # (and hardly anyone has unhidden it)
         # then hide it by default for everyone
-        if (hiders > (user_count // 2) and
-        not (showers > (user_count // 3))):
+        if (hiders > (user_count // 2) and (showers <= (user_count // 3))):
           song_entry['default_hidden'] = True
         else:
           song_entry['default_hidden'] = False
