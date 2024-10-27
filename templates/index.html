@@ -169,7 +169,51 @@
 
         polling_wait = min_polling_wait;
       }
+      
+      async function hideSong(songName) {
+        const response = await fetch("/hide", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jam_id: getJamId(),
+            song: songName,
+            user_id: userId,
+          }),
+        });
 
+        const data = await response.json();
+
+        console.log("hiding");
+        console.log(data);
+        if (data.status === "success") {
+          updateSongList();
+        }
+
+        polling_wait = min_polling_wait;
+      }
+
+      async function showSong(songName) {
+        const response = await fetch("/show", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jam_id: getJamId(),
+            song: songName,
+            user_id: userId,
+          }),
+        });
+
+        const data = await response.json();
+
+        console.log("hiding");
+        console.log(data);
+        if (data.status === "success") {
+          updateSongList();
+        }
+
+        polling_wait = min_polling_wait;
+      }
+      
       function getJamId() {
         // return document.getElementById("jamIdInput").value;
         return "{{ jam_id }}";
@@ -188,7 +232,7 @@
 
         songList.innerHTML = ""; // Clear the current list
 
-        function createSongLi(song) {
+        function createSongLi(song, hideshowcallback) {
           const li = document.createElement("li");
 
           const songname_span = document.createElement("span");
@@ -248,7 +292,7 @@
           hideLink.className = "hide-song-link"; // Optional class for styling
           hideLink.onclick = function (event) {
             event.preventDefault(); // Prevent default link behavior
-            toggleHidden(song.song);
+            hideshowcallback(song.song);
           };
           li.appendChild(hideLink);
 
@@ -256,8 +300,8 @@
         }
 
         for (const song of songs) {
-          if (!song.hiders.includes(userId)) {
-            const li = createSongLi(song, );
+          if (song.showers.includes(userId) || (!song.default_hidden && !song.hiders.includes(userId))) {
+            const li = createSongLi(song, hideSong);
             songList.appendChild(li);
           }
         }
@@ -267,8 +311,8 @@
         songList2.innerHTML = ""; // Clear the current list
 
         for (const song of songs) {
-          if (song.hiders.includes(userId)) {
-            const li = createSongLi(song);
+          if (song.hiders.includes(userId) || (song.default_hidden && !song.showers.includes(userId))) {
+            const li = createSongLi(song, showSong);
             songList2.appendChild(li);
           }
         }
