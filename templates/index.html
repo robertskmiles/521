@@ -148,6 +148,29 @@
         }
       }
 
+      async function toggleHidden(songName) {
+        const response = await fetch("/togglehidden", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jam_id: getJamId(),
+            song: songName,
+            user_id: userId,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.status === "success") {
+          // Don't resort everything immediately, wait a second for the user to stop clicking
+          clearTimeout(listSortTimer);
+          listSortTimer = setTimeout(() => {
+            updateSongList();
+          }, 2000);
+
+          polling_wait = min_polling_wait;
+        }
+      }
+
       function getJamId() {
         // return document.getElementById("jamIdInput").value;
         return "{{ jam_id }}";
@@ -218,6 +241,17 @@
           fans_span.className = "fans-span";
           li.appendChild(fans_span);
 
+          // Add hide link (Unicode 'x')
+          const hideLink = document.createElement("a");
+          hideLink.href = "#"; // No actual navigation, just a link
+          hideLink.innerHTML = "&times;"; // Unicode 'x'
+          hideLink.className = "hide-song-link"; // Optional class for styling
+          hideLink.onclick = function (event) {
+            event.preventDefault(); // Prevent default link behavior
+            toggleHidden(song.song);
+          };
+          li.appendChild(hideLink);
+
           return li;
         }
 
@@ -226,17 +260,16 @@
           songList.appendChild(li);
         }
 
-        
-//         const songList2 = document.getElementById("songList2");
+        //         const songList2 = document.getElementById("songList2");
 
-//         songList2.innerHTML = ""; // Clear the current list
+        //         songList2.innerHTML = ""; // Clear the current list
 
-//         for (const song of songs) {
-//           if (!song.submitters.includes(userId)) {
-//             const li = createSongLi(song);
-//             songList2.appendChild(li);
-//           }
-//         }
+        //         for (const song of songs) {
+        //           if (!song.submitters.includes(userId)) {
+        //             const li = createSongLi(song);
+        //             songList2.appendChild(li);
+        //           }
+        //         }
 
         if (songList.innerHTML === previousList) {
           return false;

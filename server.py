@@ -51,7 +51,7 @@ def submit_song():
         if user_id not in song_entry['submitters']:
             song_entry['submitters'].append(user_id)
     else:
-        songs[jam_id].append({'song': song_name, 'submitters': [user_id]})
+        songs[jam_id].append({'song': song_name, 'submitters': [user_id], 'hiders':[]})
 
     return jsonify({'status': 'success'})
 
@@ -77,7 +77,7 @@ def toggle_song():
   
   
 @app.route('/togglehidden', methods=['POST'])
-def toggle_song():
+def toggle_hidden():
     jam_id = request.json.get('jam_id')
     song_name = request.json.get('song')
     user_id = request.json.get('user_id')
@@ -89,10 +89,10 @@ def toggle_song():
 
     song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
     if song_entry:
-        if user_id in song_entry['submitters']:
-            song_entry['submitters'].remove(user_id)
+        if user_id in song_entry['hiders']:
+            song_entry['hiders'].remove(user_id)
         else:
-            song_entry['submitters'].append(user_id)
+            song_entry['hiders'].append(user_id)
 
     return jsonify({'status': 'success'})
 
