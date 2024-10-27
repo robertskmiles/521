@@ -299,6 +299,7 @@
           hideLink.href = "#"; // No actual navigation, just a link
           hideLink.innerHTML = "&times;"; // Unicode 'x'
           hideLink.className = "hide-song-link"; // Optional class for styling
+          hideLink.title = "Hide/Show item";
           hideLink.onclick = function (event) {
             event.preventDefault(); // Prevent default link behavior
             hideshowcallback(song.song);

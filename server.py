@@ -149,56 +149,7 @@ def update_default_hidden(jam_id, song_entry):
     else:
       song_entry['default_hidden'] = False
 
-@app.route('/togglehidden', methods=['POST'])
-def toggle_hidden():
-    jam_id = request.json.get('jam_id')
-    song_name = request.json.get('song')
-    user_id = request.json.get('user_id')
-
-    print(user_id, "(un)hid", song_name)
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
-
-    # Create a set to store unique user IDs
-    unique_users = set()
-
-    # Loop through each dictionary and add unique user IDs to the set
-    for entry in songs[jam_id]:
-        unique_users.update(entry['hiders'])
-        unique_users.update(entry['showers'])
-        unique_users.update(entry['submitters'])
-
-    # Get the total count of unique users
-    user_count = len(unique_users)
       
-    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
-    if song_entry:
-        if user_id in song_entry['hiders']:
-            song_entry['hiders'].remove(user_id)
-        else:
-            song_entry['hiders'].append(user_id)
-        
-        # if user_id in song_entry['showers']:
-        #     song_entry['showers'].remove(user_id)
-        # else:
-        #     song_entry['showers'].append(user_id)
-            
-        # decide whether to show this song by deault
-        hiders = len(song_entry['hiders'])
-        showers = len(song_entry['showers'])
-        
-        # if most people have hidden it
-        # (and hardly anyone has unhidden it)
-        # then hide it by default for everyone
-        if (hiders > (user_count // 2) and (showers <= (user_count // 3))):
-          song_entry['default_hidden'] = True
-        else:
-          song_entry['default_hidden'] = False
-            
-    return jsonify({'status': 'success'})
-
-  
 @app.route('/get_songs', methods=['GET'])
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')
