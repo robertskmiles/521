@@ -34,8 +34,9 @@
       </li>
       {% endfor %}
     </ul>
-    
-    <ul id="songList2"> <!-- woohoo -->
+    <p>Completed:</p>
+    <ul id="songList2">
+      <!-- woohoo -->
     </ul>
 
     <!--
@@ -44,11 +45,11 @@
       <input type="text" id="jamIdInput" value="default" />
     </div>
     -->
-    
+
     <img
       id="qr"
       xsrc="https://cdn.glitch.global/d960c301-4426-47ac-a1bb-0d288fdd69d2/521-qr.png?v=1729312506815"
-         src="qr/{{jam_id}}.png"
+      src="qr/{{jam_id}}.png"
     />
     <div class="footer">
       <p>A Rob Miles (well, ChatGPT) project</p>
@@ -62,7 +63,6 @@
       // let jamIdTimer;
       let listSortTimer;
 
-      
       /*
       // Check if there's a saved value when the page loads
       document.addEventListener("DOMContentLoaded", function () {
@@ -95,7 +95,6 @@
         });
         
         */
-      
 
       async function submitSong() {
         const songName = document.getElementById("songInput").value;
@@ -151,7 +150,7 @@
 
       function getJamId() {
         // return document.getElementById("jamIdInput").value;
-        return "{{ jam_id }}"
+        return "{{ jam_id }}";
       }
 
       async function updateSongList() {
@@ -159,12 +158,14 @@
         const response = await fetch(`/get_songs?jam_id=${jamId}`);
         const songs = await response.json();
 
+        const songList = document.getElementById("songList");
+
         //store the old list for comparison later
         previousList = songList.innerHTML;
 
         songList.innerHTML = ""; // Clear the current list
 
-        function createSongLi (song) {
+        function createSongLi(song) {
           const li = document.createElement("li");
 
           const songname_span = document.createElement("span");
@@ -216,24 +217,26 @@
           fans_span.textContent = `(${song.submitters.length} ${fanText})`;
           fans_span.className = "fans-span";
           li.appendChild(fans_span);
-          
+
           return li;
         }
-        
-        
-        const songList = document.getElementById("songList");
-        
+
         for (const song of songs) {
           const li = createSongLi(song);
           songList.appendChild(li);
         }
+
         
-        
-        const songList2 = document.getElementById("songList2");
-         for (const song of songs) {
-          const li = createSongLi(song);
-          songList2.appendChild(li);
-        }
+//         const songList2 = document.getElementById("songList2");
+
+//         songList2.innerHTML = ""; // Clear the current list
+
+//         for (const song of songs) {
+//           if (!song.submitters.includes(userId)) {
+//             const li = createSongLi(song);
+//             songList2.appendChild(li);
+//           }
+//         }
 
         if (songList.innerHTML === previousList) {
           return false;
