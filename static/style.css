@@ -32,7 +32,7 @@ a {
 body {
     background-color: #f3f4f6;
     /*leave space at the bottom for the QR code*/
-    padding: 40px 40px 240px 40px; /* top right bottom left */
+    padding: 40px 40px 250px 40px; /* top right bottom left */
     color: #333333;
   
   

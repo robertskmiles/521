@@ -34,6 +34,9 @@
       </li>
       {% endfor %}
     </ul>
+    
+    <ul id="songList2"> <!-- woohoo -->
+    </ul>
 
     <!--
     <div class="input-container">
@@ -156,42 +159,12 @@
         const response = await fetch(`/get_songs?jam_id=${jamId}`);
         const songs = await response.json();
 
-        const songList = document.getElementById("songList");
-
         //store the old list for comparison later
         previousList = songList.innerHTML;
 
         songList.innerHTML = ""; // Clear the current list
 
-        //             for (const song of songs) {
-        //                 const li = document.createElement('li');
-
-        //                 const songname_span = document.createElement('span');
-        //                 songname_span.textContent = `${song.song} `;
-        //                 li.appendChild(songname_span);
-
-        //                 const checkboxDiv = document.createElement('div');
-        //                 checkboxDiv.className = 'checkbox-container';
-
-        //                 const checkbox = document.createElement('input');
-        //                 checkbox.type = 'checkbox';
-        //                 if (song.submitters.includes(userId)) {
-        //                     checkbox.checked = true;
-        //                 }
-        //                 checkbox.onclick = function() { toggleSong(song.song); };
-        //                 checkboxDiv.appendChild(checkbox);
-
-        //                 const fanText = (song.submitters.length === 1) ? 'fan' : 'fans';
-        //                 const fans_span = document.createElement('span');
-        //                 fans_span.textContent = `(${song.submitters.length} ${fanText})`;
-        //                 checkboxDiv.appendChild(fans_span);
-
-        //                 li.appendChild(checkboxDiv);
-
-        //                 songList.appendChild(li);
-        //             }
-
-        for (const song of songs) {
+        function createSongLi (song) {
           const li = document.createElement("li");
 
           const songname_span = document.createElement("span");
@@ -243,8 +216,23 @@
           fans_span.textContent = `(${song.submitters.length} ${fanText})`;
           fans_span.className = "fans-span";
           li.appendChild(fans_span);
-
+          
+          return li;
+        }
+        
+        
+        const songList = document.getElementById("songList");
+        
+        for (const song of songs) {
+          const li = createSongLi(song);
           songList.appendChild(li);
+        }
+        
+        
+        const songList2 = document.getElementById("songList2");
+         for (const song of songs) {
+          const li = createSongLi(song);
+          songList2.appendChild(li);
         }
 
         if (songList.innerHTML === previousList) {
