@@ -219,6 +219,7 @@
         return "{{ jam_id }}";
       }
 
+      previousList = "";
       async function updateSongList() {
         const jamId = getJamId();
         const response = await fetch(`/get_songs?jam_id=${jamId}`);
@@ -226,9 +227,18 @@
         console.log(JSON.stringify(songs));
 
         const songList = document.getElementById("songList");
-
-        //store the old list for comparison later
-        previousList = songList.innerHTML;
+        
+        if (JSON.stringify(songs) === previousList) {
+          console.log("Songs didn't change")
+          songs_changed_p = false;
+        } else {
+          songs_changed_p = true;
+          console.log("Songs changed")
+          console.log(songs)
+          //store the old list for comparison later
+          previousList = songs;
+        }
+        
 
         songList.innerHTML = ""; // Clear the current list
 
@@ -317,11 +327,7 @@
           }
         }
 
-        if (songList.innerHTML === previousList) {
-          return false;
-        } else {
-          return true;
-        }
+        return songs_changed_p;
       }
 
       async function pollSongList() {
