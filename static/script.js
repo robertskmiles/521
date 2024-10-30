@@ -158,7 +158,7 @@
         return "{{ jam_id }}";
       }
 
-      previousList = "";
+      let previousList = "";
       async function updateSongList() {
         const jamId = getJamId();
         const response = await fetch(`/get_songs?jam_id=${jamId}`);
