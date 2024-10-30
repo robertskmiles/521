@@ -293,6 +293,7 @@
 
           // Add hide/un-hide link
           const hideLink = document.createElement("a");
+          hideshowcallback = null;
           hideLink.href = "#"; // No actual navigation, just a link
           hideLink.className = "hide-song-link"; // Optional class for styling
           if (songlist === 1) {
