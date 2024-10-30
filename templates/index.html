@@ -295,11 +295,11 @@
           const hideLink = document.createElement("a");
           hideLink.href = "#"; // No actual navigation, just a link
           hideLink.className = "hide-song-link"; // Optional class for styling
-          if (songlist == 1) {
+          if (songlist === 1) {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
             hideLink.title = "Mark as completed";
             hideshowcallback = hideSong;
-          } else {
+          } else if (songlist === 2) {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
             hideLink.title = "Mark as not completed";
             hideshowcallback = showSong;
@@ -340,7 +340,7 @@
         }
         
         songList2Label = document.getElementById("songList2Label");
-        if (songList2Empty == true) {
+        if (songList2Empty === true) {
           songList2Label.style.display = "none";
         } else {
           songList2Label.style.display = "block";
