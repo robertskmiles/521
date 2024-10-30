@@ -308,6 +308,7 @@
           hideLink.onclick = function (event) {
             event.preventDefault(); // Prevent default link behavior
             hideshowcallback(song.song);
+            updateSongList();
           };
           li.appendChild(hideLink);
 
