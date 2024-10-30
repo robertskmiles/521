@@ -241,7 +241,7 @@
 
         songList.innerHTML = ""; // Clear the current list
 
-        function createSongLi(song, hideshowcallback) {
+        function createSongLi(song, songlist) {
           const li = document.createElement("li");
 
           const songname_span = document.createElement("span");
@@ -297,9 +297,16 @@
           // Add hide link (Unicode 'x')
           const hideLink = document.createElement("a");
           hideLink.href = "#"; // No actual navigation, just a link
-          hideLink.innerHTML = "&times;"; // Unicode 'x'
           hideLink.className = "hide-song-link"; // Optional class for styling
-          hideLink.title = "Hide/Show item";
+          if (songlist == 1) {
+            hideLink.innerHTML = "&times;"; // Unicode 'x'
+            hideLink.title = "Hide item";
+            hideshowcallback = hideSong;
+          } else {
+            hideLink.innerHTML = "&times;"; // Unicode 'x'
+            hideLink.title = "Show item";
+            hideshowcallback = showSong;
+          }
           hideLink.onclick = function (event) {
             event.preventDefault(); // Prevent default link behavior
             hideshowcallback(song.song);
@@ -311,7 +318,7 @@
 
         for (const song of songs) {
           if (song.showers.includes(userId) || (!song.default_hidden && !song.hiders.includes(userId))) {
-            const li = createSongLi(song, hideSong);
+            const li = createSongLi(song, 1);
             songList.appendChild(li);
           }
         }
@@ -322,7 +329,7 @@
 
         for (const song of songs) {
           if (song.hiders.includes(userId) || (song.default_hidden && !song.showers.includes(userId))) {
-            const li = createSongLi(song, showSong);
+            const li = createSongLi(song, 2);
             songList2.appendChild(li);
           }
         }
