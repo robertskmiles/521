@@ -135,7 +135,7 @@
 
         const data = await response.json();
         if (data.status === "success") {
-          // Don't resort everything immediately, wait a second for the user to stop clicking
+          // Don't resort everything immediately, wait a bit for the user to stop clicking
           clearTimeout(listSortTimer);
           listSortTimer = setTimeout(() => {
             updateSongList();
@@ -180,8 +180,6 @@
 
         const data = await response.json();
 
-        console.log("hiding");
-        console.log(data);
         if (data.status === "success") {
           updateSongList();
         }
@@ -202,8 +200,6 @@
 
         const data = await response.json();
 
-        console.log("hiding");
-        console.log(data);
         if (data.status === "success") {
           updateSongList();
         }
@@ -303,7 +299,7 @@
             hideshowcallback = hideSong;
           } else {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
-            hideLink.title = "Un-mark as completed";
+            hideLink.title = "Mark as not completed";
             hideshowcallback = showSong;
           }
           hideLink.onclick = function (event) {
