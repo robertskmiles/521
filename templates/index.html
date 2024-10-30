@@ -34,7 +34,9 @@
       </li>
       {% endfor %}
     </ul>
-    <p>Completed:</p>
+    <div id="songList2Label">
+      <p>Completed:</p>
+    </div>
     <ul id="songList2">
       <!-- woohoo -->
     </ul>
@@ -325,14 +327,23 @@
 
         songList2.innerHTML = ""; // Clear the current list
 
+        songList2Empty = true;
         for (const song of songs) {
           if (
             song.hiders.includes(userId) ||
             (song.default_hidden && !song.showers.includes(userId))
           ) {
+            songList2Empty = false;
             const li = createSongLi(song, 2);  // let createSong know that this is list 2, styled differently
             songList2.appendChild(li);
           }
+        }
+        
+        songList2Label = document.getElementById("songList2Label")
+        if (songList2Empty) {
+          songList2Label.style.display = "none";
+        } else {
+          songList2Label.style.display = "block";
         }
 
         return songs_changed_p;
