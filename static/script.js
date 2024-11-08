@@ -1,5 +1,5 @@
 
-      const userId = "{{ user_id }}";
+      // const userId = "{{ user_id }}";
       const min_polling_wait = 3000; //3s
       const max_polling_wait = 20000; //20s
 
