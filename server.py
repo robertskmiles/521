@@ -1,13 +1,22 @@
 from flask import Flask, render_template, request, jsonify, make_response, send_file, abort
 import qrcode
 import os
+import random
+import string
+import json
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret_key'
 
+def generate_short_id(length=8):
+    # Use all letters and numbers, but skip confusing ones like l, I, O
+    chars = string.ascii_letters + string.digits
+    chars = chars.replace('l', '').replace('I', '').replace('O', '')
+    return ''.join(random.choice(chars) for _ in range(length))
+
+
 # In-memory storage
 songs = {'default':[]}
-user_id_counter = 0  # Counter to give each user a unique ID
 
 qr_cache_dir = os.path.join('static', 'qr')
 # Ensure the cache directory exists
@@ -18,14 +27,11 @@ if not os.path.exists(qr_cache_dir):
 @app.route('/<string:jam_id>')
 @app.route('/')
 def index(jam_id="default"):
-    global user_id_counter
-
     print(request.cookies)
     # jam_id = request.args.get('jam_id', 'default')
     user_id = request.cookies.get('user_id')
     if not user_id:
-        user_id_counter += 1
-        user_id = str(user_id_counter)
+        user_id = generate_short_id()
 
     user_submitted_songs = [song['song'] for song in songs.get(jam_id, []) if user_id in song['submitters']]
 
@@ -153,7 +159,8 @@ def update_default_hidden(jam_id, song_entry):
 @app.route('/get_songs', methods=['GET'])
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')
-    print(jam_id, songs)
+    print(jam_id)
+    print(json.dumps(songs, indent=4))
     
     # Check if this is a new jam, make it if so
     if not songs.get(jam_id, None):
