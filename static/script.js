@@ -6,38 +6,6 @@
       // let jamIdTimer;
       let listSortTimer;
 
-      /*
-      // Check if there's a saved value when the page loads
-      document.addEventListener("DOMContentLoaded", function () {
-        if (localStorage.getItem("jamId")) {
-          document.getElementById("jamIdInput").value =
-            localStorage.getItem("jamId");
-        }
-      });
-
-      // Listen for changes in the text box
-      document
-        .getElementById("jamIdInput")
-        .addEventListener("input", function () {
-          localStorage.setItem("jamId", this.value);
-
-          //update the URL to reflect the new jam id
-          newUrl = "http://521.glitch.me/" + this.value;
-          if (window.location.pathname !== newUrl) {
-            window.history.pushState({}, "", newUrl);
-          }
-
-          // Whenever the jamid changes, reset a timer
-          // so we can refresh the list shortly afterwards
-          clearTimeout(jamIdTimer);
-
-          // Set a new timer
-          jamIdTimer = setTimeout(() => {
-            updateSongList();
-          }, 1000);
-        });
-
-        */
 
       async function submitSong() {
         const songName = document.getElementById("songInput").value;
