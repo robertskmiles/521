@@ -5,6 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>V-ii-I</title>
+        <script>
+      window.userId = "{{ user_id }}";
+      window.jamId = "{{ jam_id }}";
+    </script>
   </head>
   <body>
     <h1>V-ii-I</h1>
@@ -55,8 +59,8 @@
       <p>A Rob Miles (well, ChatGPT and Claude) project</p>
     </div>
     <script>
-      const userId = "{{ user_id }}";
-      const jamId = "{{ jam_id }}";
+       userId = "{{ user_id }}";
+       jamId = "{{ jam_id }}";
     </script>
     <script src="static/script.js"></script>
   </body>

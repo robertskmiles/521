@@ -123,7 +123,7 @@
 
       function getJamId() {
         // return document.getElementById("jamIdInput").value;
-        return jamId;
+        return window.jamId;
       }
 
       let previousList = "";
