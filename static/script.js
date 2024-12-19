@@ -2,6 +2,7 @@
       // const userId = "{{ user_id }}";
       const min_polling_wait = 3000; //3s
       const max_polling_wait = 20000; //20s
+      let polling_wait = min_polling_wait;
 
       // let jamIdTimer;
       let listSortTimer;
@@ -237,6 +238,7 @@
           const li = document.createElement("li");
           li.textContent = "No suggestions yet";
           li.style.fontStyle = "italic";
+          li.style.color = "grey";
           songList.appendChild(li);
           // songList.innerHTML = "<p>No suggestions yet</p>";
         }

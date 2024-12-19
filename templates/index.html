@@ -21,23 +21,7 @@
 
     <p>Check the box for each you like:</p>
     <ul id="songList">
-      {% for song in songs %}
-      <li>
-        {{ song.song }}
-        <input
-          type="checkbox"
-          {%
-          if
-          song.song
-          in
-          user_submitted_songs
-          %}checked{%
-          endif
-          %}
-          onclick="toggleSong('{{ song.song }}')"
-        />
-      </li>
-      {% endfor %}
+      <p style="color: grey; font-style: italic;">No suggestions yet</p></br>
     </ul>
     <div id="songList2Label">
       <p>Completed:</p>
