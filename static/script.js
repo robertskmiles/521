@@ -232,6 +232,15 @@
           return li;
         }
 
+        console.log(songs.length);
+        if (songs.length === 0) {
+          const li = document.createElement("li");
+          li.textContent = "No suggestions yet";
+          li.style.fontStyle = "italic";
+          songList.appendChild(li);
+          // songList.innerHTML = "<p>No suggestions yet</p>";
+        }
+        
         for (const song of songs) {
           if (
             song.showers.includes(userId) ||
