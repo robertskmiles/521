@@ -155,7 +155,7 @@
 
       function getJamId() {
         // return document.getElementById("jamIdInput").value;
-        return "{{ jam_id }}";
+        return jamId;
       }
 
       let previousList = "";
