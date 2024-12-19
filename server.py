@@ -160,7 +160,9 @@ def update_default_hidden(jam_id, song_entry):
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')
     print(jam_id)
-    print(json.dumps(songs, indent=4))
+    for song in songs[jam_id]:
+      # print(json.dumps(songs, indent=4))
+      print(song)
     
     # Check if this is a new jam, make it if so
     if not songs.get(jam_id, None):
