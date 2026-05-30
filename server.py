@@ -60,6 +60,14 @@ def index(jam_id="default"):
     if not user_id:
         user_id = generate_short_id()
 
+    # A ?mode=... link casts this user's mode vote, so sharing e.g.
+    # letspick.onrender.com/myroom?mode=songs drops the recipient straight into
+    # that mode (it wins outright in a fresh room; otherwise the majority still
+    # applies, same as picking it from the gear menu).
+    requested_mode = request.args.get('mode')
+    if requested_mode in VALID_MODES:
+        mode_votes.setdefault(jam_id, {})[user_id] = requested_mode
+
     user_submitted_songs = [song['song'] for song in songs.get(jam_id, []) if user_id in song['submitters']]
 
     response = make_response(render_template('index.html', jam_id=jam_id, songs=songs.get(jam_id, []), user_submitted_songs=user_submitted_songs, user_id=user_id, mode=compute_mode(jam_id)))
