@@ -4,38 +4,42 @@
     <link rel="stylesheet" href="static/style.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>V-ii-I</title>
+    <title>Let's Pick</title>
         <script>
       window.userId = "{{ user_id }}";
       window.jamId = "{{ jam_id }}";
+      window.initialMode = "{{ mode }}";
     </script>
   </head>
-  <body>
-    <h1>V-ii-I</h1>
+  <body class="mode-{{ mode }}">
+    <!-- Mode switcher: unobtrusive gear icon + dropdown -->
+    <div id="modeMenu">
+      <button id="modeGear" type="button" title="Change mode" aria-label="Change mode" onclick="toggleModeMenu()">&#9881;</button>
+      <ul id="modeMenuList">
+        <li><button type="button" data-mode="general" onclick="setMode('general')">Anything</button></li>
+        <li><button type="button" data-mode="songs" onclick="setMode('songs')">Songs</button></li>
+        <li><button type="button" data-mode="questions" onclick="setMode('questions')">Questions</button></li>
+      </ul>
+    </div>
+
+    <h1 id="heading">{{ {'songs': "Let's Pick a song", 'questions': "Let's Pick a question"}.get(mode, "Let's Pick a thing") }}</h1>
     <h2>{{ request.host }}/{{jam_id}}</h2>
 <br/>
     <div id="submitform">
-      <input type="text" id="songInput" placeholder="Type suggestions here" />
+      <textarea id="songInput" rows="1" placeholder="Type a suggestion here"></textarea>
       <button onclick="submitSong()" id="submitBtn">Submit</button>
     </div>
 
-    <p>Check the box for each you like:</p>
+    <p id="likePrompt">Check the box for each you like:</p>
     <ul id="songList">
       <p style="color: grey; font-style: italic;">No suggestions yet</p></br>
     </ul>
     <div id="songList2Label">
-      <p>Completed:</p>
+      <p>Done:</p>
     </div>
     <ul id="songList2">
       <!-- woohoo -->
     </ul>
-
-    <!--
-    <div class="input-container">
-      <label>Group ID:</label>
-      <input type="text" id="jamIdInput" value="default" />
-    </div>
-    -->
 
     <img id="qr" src="qr/{{jam_id}}.png" />
 

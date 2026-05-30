@@ -1,5 +1,42 @@
 
       // const userId = "{{ user_id }}";
+
+      // Per-mode configuration: the single source of truth for everything that
+      // differs between the songs / questions / general modes.
+      const MODES = {
+        general: {
+          heading: "Let's Pick a thing",
+          placeholder: "Type a suggestion here",
+          likePrompt: "Check the box for each you like:",
+          completed: "Done:",
+          markDone: "Mark as done",
+          markUndone: "Mark as not done",
+          unit1: "vote", unitN: "votes",
+          links: false, multiline: false,
+        },
+        songs: {
+          heading: "Let's Pick a song",
+          placeholder: "Type a song here",
+          likePrompt: "Check the box for each you like:",
+          completed: "Played:",
+          markDone: "Mark as played",
+          markUndone: "Mark as not played",
+          unit1: "fan", unitN: "fans",
+          links: true, multiline: false,
+        },
+        questions: {
+          heading: "Let's Pick a question",
+          placeholder: "Type your question here",
+          likePrompt: "Check the box for each you'd like asked:",
+          completed: "Asked:",
+          markDone: "Mark as asked",
+          markUndone: "Mark as not asked",
+          unit1: "vote", unitN: "votes",
+          links: false, multiline: true,
+        },
+      };
+      let currentMode = window.initialMode in MODES ? window.initialMode : "general";
+
       const min_polling_wait = 3000; //3s
       const max_polling_wait = 20000; //20s
       let polling_wait = min_polling_wait;
@@ -32,10 +69,87 @@
       document
         .getElementById("songInput")
         .addEventListener("keydown", function (event) {
-          if (event.key === "Enter") {
+          // In multiline (questions) mode, Enter inserts a newline; submit via
+          // the button. Otherwise Enter submits (unless Shift is held).
+          if (event.key === "Enter" && !MODES[currentMode].multiline && !event.shiftKey) {
+            event.preventDefault();
             submitSong();
           }
         });
+
+      // Apply the given mode to the UI (strings, styling, input behaviour).
+      function applyMode(mode) {
+        if (!(mode in MODES)) mode = "general";
+        currentMode = mode;
+        const cfg = MODES[mode];
+
+        document.body.className = "mode-" + mode;
+
+        const heading = document.getElementById("heading");
+        if (heading) heading.textContent = cfg.heading;
+
+        const likePrompt = document.getElementById("likePrompt");
+        if (likePrompt) likePrompt.textContent = cfg.likePrompt;
+
+        const completedLabel = document.querySelector("#songList2Label p");
+        if (completedLabel) completedLabel.textContent = cfg.completed;
+
+        const input = document.getElementById("songInput");
+        if (input) {
+          input.placeholder = cfg.placeholder;
+          if (cfg.multiline) {
+            input.rows = 3;
+            input.classList.add("multiline");
+          } else {
+            input.rows = 1;
+            input.classList.remove("multiline");
+          }
+        }
+
+        // Highlight the active mode in the gear menu.
+        document.querySelectorAll("#modeMenuList button").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.mode === mode);
+        });
+      }
+
+      function toggleModeMenu() {
+        document.getElementById("modeMenu").classList.toggle("open");
+      }
+
+      // Close the gear menu on outside click or Escape.
+      document.addEventListener("click", function (event) {
+        const menu = document.getElementById("modeMenu");
+        if (menu && !menu.contains(event.target)) {
+          menu.classList.remove("open");
+        }
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          document.getElementById("modeMenu").classList.remove("open");
+        }
+      });
+
+      // Cast this user's mode vote, then apply the resulting effective mode
+      // (which may differ from the pick if the user is outvoted).
+      async function setMode(mode) {
+        document.getElementById("modeMenu").classList.remove("open");
+        const response = await fetch("/set_mode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jam_id: getJamId(),
+            mode: mode,
+            user_id: userId,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.status === "success") {
+          applyMode(data.mode);
+          updateSongList();
+          polling_wait = min_polling_wait;
+        }
+      }
 
       async function toggleSong(songName) {
         const response = await fetch("/toggle", {
@@ -131,19 +245,25 @@
       async function updateSongList() {
         const jamId = getJamId();
         const response = await fetch(`/get_songs?jam_id=${jamId}`);
-        const songs = await response.json();
-        console.log(JSON.stringify(songs));
+        const payload = await response.json();
+        const songs = payload.songs || [];
+        console.log(JSON.stringify(payload));
+
+        // Effective mode can change as others vote; apply it before rendering.
+        if (payload.mode && payload.mode !== currentMode) {
+          applyMode(payload.mode);
+        }
 
         const songList = document.getElementById("songList");
 
-        if (JSON.stringify(songs) === previousList) {
+        if (JSON.stringify(payload) === previousList) {
           console.log("Songs didn't change");
           songs_changed_p = false;
         } else {
           songs_changed_p = true;
           console.log("Songs changed");
           //store the old list for comparison later
-          previousList = JSON.stringify(songs);
+          previousList = JSON.stringify(payload);
         }
 
         songList.innerHTML = ""; // Clear the current list
@@ -155,31 +275,34 @@
           songname_span.textContent = `${song.song}     `;
           li.appendChild(songname_span);
 
-          // Create YouTube search link
-          const youtubeLink = document.createElement("a");
-          youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-            song.song
-          )}`;
-          youtubeLink.target = "_blank"; // Open link in a new tab/window
-          youtubeLink.title = `Search for song on YouTube`;
+          // Song-specific helper links (YouTube + chords) only in songs mode.
+          if (MODES[currentMode].links) {
+            // Create YouTube search link
+            const youtubeLink = document.createElement("a");
+            youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(
+              song.song
+            )}`;
+            youtubeLink.target = "_blank"; // Open link in a new tab/window
+            youtubeLink.title = `Search for song on YouTube`;
 
-          const youtubeIcon = document.createTextNode(" ▶️ ");
-          youtubeLink.appendChild(youtubeIcon);
+            const youtubeIcon = document.createTextNode(" ▶️ ");
+            youtubeLink.appendChild(youtubeIcon);
 
-          songname_span.appendChild(youtubeLink);
+            songname_span.appendChild(youtubeLink);
 
-          // Create chord search link
-          const chordsLink = document.createElement("a");
-          chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(
-            song.song + " chords"
-          )}`;
-          chordsLink.target = "_blank"; // Open link in a new tab/window
-          chordsLink.title = `Search for chords on Google`;
+            // Create chord search link
+            const chordsLink = document.createElement("a");
+            chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(
+              song.song + " chords"
+            )}`;
+            chordsLink.target = "_blank"; // Open link in a new tab/window
+            chordsLink.title = `Search for chords on Google`;
 
-          const chordsIcon = document.createTextNode(" 🎸 ");
-          chordsLink.appendChild(chordsIcon);
+            const chordsIcon = document.createTextNode(" 🎸 ");
+            chordsLink.appendChild(chordsIcon);
 
-          songname_span.appendChild(chordsLink);
+            songname_span.appendChild(chordsLink);
+          }
 
           // Create checkbox for liking songs
           const checkboxDiv = document.createElement("div");
@@ -197,8 +320,11 @@
           checkboxDiv.appendChild(checkbox);
           li.appendChild(checkboxDiv);
 
-          // How many fans does the song have?
-          const fanText = song.submitters.length === 1 ? "fan" : "fans";
+          // How many fans/votes does the suggestion have?
+          const fanText =
+            song.submitters.length === 1
+              ? MODES[currentMode].unit1
+              : MODES[currentMode].unitN;
           const fans_span = document.createElement("span");
           fans_span.textContent = `(${song.submitters.length} ${fanText})`;
           fans_span.className = "fans-span";
@@ -211,11 +337,11 @@
           hideLink.className = "hide-song-link"; // Optional class for styling
           if (songlist === 1) {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
-            hideLink.title = "Mark as completed";
+            hideLink.title = MODES[currentMode].markDone;
 
           } else if (songlist === 2) {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
-            hideLink.title = "Mark as not completed";
+            hideLink.title = MODES[currentMode].markUndone;
 
           }
           hideLink.onclick = function (event) {
@@ -297,5 +423,7 @@
         setTimeout(pollSongList, polling_wait);
       }
 
+      // Apply the server-provided initial mode immediately (avoids a flash),
+      // then start polling — which keeps the mode in sync as others vote.
+      applyMode(currentMode);
       pollSongList();
-    

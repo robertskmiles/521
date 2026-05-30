@@ -23,6 +23,28 @@ def generate_short_id(length=8):
 # In-memory storage
 songs = {'default':[]}
 
+# Per-room mode votes: {jam_id: {user_id: 'songs'|'questions'|'general'}}
+# A user who hasn't picked a mode sees the majority pick among those who have,
+# mirroring the no-central-authority hide/show voting (see update_default_hidden).
+mode_votes = {}
+
+VALID_MODES = ('songs', 'questions', 'general')
+DEFAULT_MODE = 'general'
+# Tie-break priority when vote counts are equal (first listed wins):
+MODE_PRIORITY = ('songs', 'questions', 'general')
+
+
+def compute_mode(jam_id):
+    votes = mode_votes.get(jam_id, {})
+    if not votes:
+        return DEFAULT_MODE
+    counts = {mode: 0 for mode in VALID_MODES}
+    for mode in votes.values():
+        if mode in counts:
+            counts[mode] += 1
+    # Highest count wins; ties broken by MODE_PRIORITY order.
+    return max(MODE_PRIORITY, key=lambda mode: counts[mode])
+
 qr_cache_dir = os.path.join('static', 'qr')
 # Ensure the cache directory exists
 if not os.path.exists(qr_cache_dir):
@@ -40,7 +62,7 @@ def index(jam_id="default"):
 
     user_submitted_songs = [song['song'] for song in songs.get(jam_id, []) if user_id in song['submitters']]
 
-    response = make_response(render_template('index.html', jam_id=jam_id, songs=songs.get(jam_id, []), user_submitted_songs=user_submitted_songs, user_id=user_id))
+    response = make_response(render_template('index.html', jam_id=jam_id, songs=songs.get(jam_id, []), user_submitted_songs=user_submitted_songs, user_id=user_id, mode=compute_mode(jam_id)))
     response.set_cookie('user_id', user_id, max_age=60*60*24)  # Set cookie to expire after 1 day
 
     return response
@@ -161,6 +183,22 @@ def update_default_hidden(jam_id, song_entry):
       song_entry['default_hidden'] = False
 
       
+@app.route('/set_mode', methods=['POST'])
+def set_mode():
+    jam_id = request.json.get('jam_id')
+    user_id = request.json.get('user_id')
+    mode = request.json.get('mode')
+
+    if mode not in VALID_MODES:
+        return jsonify({'status': 'error', 'message': 'invalid mode'}), 400
+
+    print(user_id, "voted mode", mode, "in", jam_id)
+    mode_votes.setdefault(jam_id, {})[user_id] = mode
+
+    # Return the new effective mode (may differ from the user's pick if outvoted).
+    return jsonify({'status': 'success', 'mode': compute_mode(jam_id)})
+
+
 @app.route('/get_songs', methods=['GET'])
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')
@@ -176,7 +214,7 @@ def get_songs():
       songs[jam_id] = []
       
     sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
-    return jsonify(sorted_songs)
+    return jsonify({'mode': compute_mode(jam_id), 'songs': sorted_songs})
 
 @app.route('/qr/<string:jam_id>.png')
 def generate_qr(jam_id):

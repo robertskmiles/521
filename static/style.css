@@ -6,6 +6,13 @@
     font-family: 'Arial', sans-serif;
 }
 
+/* Per-mode accent colour. Each mode sets --accent / --accent-dark; the rest of
+   the stylesheet references these so a mode feels distinct without re-theming. */
+body            { --accent: #607d8b; --accent-dark: #4b626e; } /* fallback */
+body.mode-general   { --accent: #607d8b; --accent-dark: #4b626e; } /* slate */
+body.mode-songs     { --accent: #4a90e2; --accent-dark: #357ab7; } /* blue  */
+body.mode-questions { --accent: #16a085; --accent-dark: #0e7d68; } /* teal  */
+
 
 #qr {
     padding-top: 50px;
@@ -45,7 +52,7 @@ body {
 }
 
 h1 {
-    color: #4a90e2;
+    color: var(--accent);
     margin-bottom: 20px;
 }
 
@@ -53,7 +60,7 @@ label, input, button {
     margin-bottom: 10px;
 }
 
-input[type="text"], button {
+input[type="text"], textarea, button {
     padding: 10px 15px;
     border-radius: 5px;
     border: 1px solid #cccccc;
@@ -61,13 +68,26 @@ input[type="text"], button {
     max-width: 300px;
 }
 
-input[type="text"]:focus {
+textarea {
+    font-size: 1em;
+    resize: none;        /* single-line modes: no drag handle */
+    overflow: hidden;
+    vertical-align: top;
+}
+
+textarea.multiline {
+    min-height: 5em;
+    resize: vertical;    /* questions mode: let people drag taller */
+    overflow: auto;
+}
+
+input[type="text"]:focus, textarea:focus {
     outline: none;
-    border-color: #4a90e2;
+    border-color: var(--accent);
 }
 
 button {
-    background-color: #4a90e2;
+    background-color: var(--accent);
     color: #ffffff;
     border: none;
     cursor: pointer;
@@ -75,7 +95,81 @@ button {
 }
 
 button:hover {
-    background-color: #357ab7;
+    background-color: var(--accent-dark);
+}
+
+/* Mode switcher: gear icon + dropdown, top-right, out of the way. */
+#modeMenu {
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    z-index: 200;
+}
+
+#modeGear {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 4px 8px;
+    background: none;
+    color: #9aa0a6;
+    font-size: 22px;
+    line-height: 1;
+    transition: color 0.2s, transform 0.2s;
+}
+
+#modeGear:hover {
+    background: none;
+    color: var(--accent);
+    transform: rotate(30deg);
+}
+
+#modeMenuList {
+    display: none;
+    position: absolute;
+    top: 36px;
+    right: 0;
+    margin: 0;
+    list-style: none;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    min-width: 140px;
+}
+
+#modeMenu.open #modeMenuList {
+    display: block;
+}
+
+#modeMenuList li {
+    background: none;
+    margin: 0;
+    padding: 0;
+    display: block;
+    border-radius: 0;
+}
+
+#modeMenuList button {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 10px 14px;
+    text-align: left;
+    background: none;
+    color: #333333;
+    border-radius: 0;
+}
+
+#modeMenuList button:hover {
+    background: #f3f4f6;
+    color: #333333;
+}
+
+#modeMenuList button.active {
+    background: var(--accent);
+    color: #ffffff;
 }
 
 
@@ -127,6 +221,7 @@ li span {
 
 input[type="checkbox"] {
     margin: 5px;   /* This provides spacing between checkbox and the fan count */
+    accent-color: var(--accent);
   
 /*     padding: 7px 0;  /* Add padding to center the text vertically */
 }
