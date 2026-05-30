@@ -37,9 +37,12 @@
       };
       let currentMode = window.initialMode in MODES ? window.initialMode : "general";
 
-      const min_polling_wait = 3000; //3s
-      const max_polling_wait = 20000; //20s
+      const min_polling_wait = 1000; //1s
+      const max_polling_wait = 15000; //15s
       let polling_wait = min_polling_wait;
+      // Last room version seen from the server. -1 never matches a real version,
+      // so the first poll always pulls the full payload and syncs.
+      let currentVersion = -1;
 
       // let jamIdTimer;
       let listSortTimer;
@@ -241,13 +244,21 @@
         return window.jamId;
       }
 
-      let previousList = "";
       async function updateSongList() {
         const jamId = getJamId();
-        const response = await fetch(`/get_songs?jam_id=${jamId}`);
+        const response = await fetch(`/get_songs?jam_id=${jamId}&v=${currentVersion}`);
         const payload = await response.json();
+
+        // Server says nothing changed since our last version: skip the whole
+        // re-render (avoids clearing/rebuilding both lists and checkbox flicker).
+        if (payload.changed === false) {
+          currentVersion = payload.version;
+          return false;
+        }
+
+        currentVersion = payload.version;
+        songs_changed_p = true;
         const songs = payload.songs || [];
-        console.log(JSON.stringify(payload));
 
         // Effective mode can change as others vote; apply it before rendering.
         if (payload.mode && payload.mode !== currentMode) {
@@ -255,16 +266,6 @@
         }
 
         const songList = document.getElementById("songList");
-
-        if (JSON.stringify(payload) === previousList) {
-          console.log("Songs didn't change");
-          songs_changed_p = false;
-        } else {
-          songs_changed_p = true;
-          console.log("Songs changed");
-          //store the old list for comparison later
-          previousList = JSON.stringify(payload);
-        }
 
         songList.innerHTML = ""; // Clear the current list
 

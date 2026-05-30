@@ -23,6 +23,14 @@ def generate_short_id(length=8):
 # In-memory storage
 songs = {'default':[]}
 
+# Per-room state version, bumped on every mutation so /get_songs can answer
+# "nothing changed" cheaply. Clients send their last-seen version; if it still
+# matches we skip sorting + serializing the full list. Default 0 for new rooms.
+versions = {}
+
+def bump(jam_id):
+    versions[jam_id] = versions.get(jam_id, 0) + 1
+
 # Per-room mode votes: {jam_id: {user_id: 'songs'|'questions'|'general'}}
 # A user who hasn't picked a mode sees the majority pick among those who have,
 # mirroring the no-central-authority hide/show voting (see update_default_hidden).
@@ -67,6 +75,7 @@ def index(jam_id="default"):
     requested_mode = request.args.get('mode')
     if requested_mode in VALID_MODES:
         mode_votes.setdefault(jam_id, {})[user_id] = requested_mode
+        bump(jam_id)
 
     user_submitted_songs = [song['song'] for song in songs.get(jam_id, []) if user_id in song['submitters']]
 
@@ -94,6 +103,7 @@ def submit_song():
     else:
         songs[jam_id].append({'song': song_name, 'submitters': [user_id], 'hiders':[], 'showers':[], 'default_hidden':False})
 
+    bump(jam_id)
     return jsonify({'status': 'success'})
 
 @app.route('/toggle', methods=['POST'])
@@ -113,6 +123,7 @@ def toggle_song():
             song_entry['submitters'].remove(user_id)
         else:
             song_entry['submitters'].append(user_id)
+        bump(jam_id)
 
     return jsonify({'status': 'success'})
 
@@ -137,6 +148,7 @@ def hide_song():
             
     
     update_default_hidden(jam_id, song_entry)
+    bump(jam_id)
     return jsonify({'status': 'success'})
 
 
@@ -159,6 +171,7 @@ def show_song():
             song_entry['hiders'].remove(user_id)
     
     update_default_hidden(jam_id, song_entry)
+    bump(jam_id)
     return jsonify({'status': 'success'})
 
 def update_default_hidden(jam_id, song_entry):
@@ -202,6 +215,7 @@ def set_mode():
 
     print(user_id, "voted mode", mode, "in", jam_id)
     mode_votes.setdefault(jam_id, {})[user_id] = mode
+    bump(jam_id)
 
     # Return the new effective mode (may differ from the user's pick if outvoted).
     return jsonify({'status': 'success', 'mode': compute_mode(jam_id)})
@@ -210,19 +224,18 @@ def set_mode():
 @app.route('/get_songs', methods=['GET'])
 def get_songs():
     jam_id = request.args.get('jam_id', 'default')
-    print(jam_id)
     if not songs.get(jam_id, None):
       songs[jam_id] = []
-    for song in songs[jam_id]:
-      # print(json.dumps(songs, indent=4))
-      print(song)
-    
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
-      
+
+    # Conditional poll: if the client's last-seen version still matches, nothing
+    # changed, so return a tiny response and skip the sort + full serialization.
+    client_v = request.args.get('v', type=int)
+    current_v = versions.get(jam_id, 0)
+    if client_v is not None and client_v == current_v:
+      return jsonify({'changed': False, 'version': current_v})
+
     sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
-    return jsonify({'mode': compute_mode(jam_id), 'songs': sorted_songs})
+    return jsonify({'changed': True, 'version': current_v, 'mode': compute_mode(jam_id), 'songs': sorted_songs})
 
 @app.route('/qr/<string:jam_id>.png')
 def generate_qr(jam_id):
