@@ -259,9 +259,10 @@ li span {
 */
 
 .fans-span {
-  width:3.5em;
+  width:5em;
   align-items: center;
   text-align:center;
+  white-space: nowrap;
 }
 
 input[type="checkbox"] {
