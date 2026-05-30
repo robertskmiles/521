@@ -1,0 +1,9 @@
+.env
+.cache/
+.local/
+.data/
+__pycache__/
+*.pyc
+.bash_history
+.glitch-assets
+static/qr/

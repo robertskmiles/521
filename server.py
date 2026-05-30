@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, make_response, send_file, abort
+from werkzeug.middleware.proxy_fix import ProxyFix
 import qrcode
 import os
 import random
@@ -7,6 +8,10 @@ import json
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret_key'
+
+# Render (and most PaaS hosts) terminate TLS at a proxy and forward the request.
+# Trust the X-Forwarded-* headers so request.host_url reflects the real https host.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 def generate_short_id(length=8):
     # Use all letters and numbers, but skip confusing ones like l, I, O
@@ -175,8 +180,8 @@ def get_songs():
 
 @app.route('/qr/<string:jam_id>.png')
 def generate_qr(jam_id):
-    # Create the QR code URL
-    url = 'https://521.glitch.me/{}'.format(jam_id)
+    # Create the QR code URL from the live host, so it works on any domain
+    url = request.host_url + jam_id
     qr_filename = '{}.png'.format(jam_id)
     qr_filepath = os.path.join(qr_cache_dir, qr_filename)
 
