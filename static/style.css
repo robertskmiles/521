@@ -71,19 +71,47 @@ input[type="text"], textarea, button {
     border: 1px solid #cccccc;
 }
 
-/* Suggestion box spans the full width; the Submit button sits below it and is
-   only as wide as its label. */
+/* Unified suggestion box (styling copied from the Waypoint "Add a comment"
+   box): a bordered rounded container holds a borderless, transparent textarea,
+   with the Submit button tucked into the bottom-right corner. The textarea
+   reserves bottom padding so text never runs under the button. */
+#submitform {
+    position: relative;
+    width: 100%;
+    max-width: none;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+#submitform:focus-within {
+    border-color: var(--accent);
+}
+
 #songInput {
     display: block;
     width: 100%;
     max-width: none;
-    margin-bottom: 10px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    padding: 10px 12px 36px 12px;  /* bottom space for the corner button */
+    color: inherit;
 }
 
 #submitBtn {
-    display: inline-block;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
     width: auto;
     max-width: none;
+    margin: 0;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
 }
 
 textarea {
@@ -95,13 +123,12 @@ textarea {
 
 textarea.multiline {
     min-height: 5em;
-    resize: vertical;    /* questions mode: let people drag taller */
+    resize: none;
     overflow: auto;
 }
 
 input[type="text"]:focus, textarea:focus {
     outline: none;
-    border-color: var(--accent);
 }
 
 button {
@@ -314,20 +341,15 @@ body.mode-questions #songList2Label p {
     font-weight: 700;
 }
 
-/* paper panels: input + suggestion cards */
-body.mode-questions textarea,
-body.mode-questions input[type="text"] {
+/* paper panels: the suggestion box + the suggestion cards */
+body.mode-questions #submitform {
     background: var(--q-paper);
-    border: 1px solid var(--q-line);
-    border-radius: 14px;
-    color: var(--q-ink);
+    border-color: #bdb2a2;   /* warm tan line, matching the conference box */
     box-shadow: var(--q-shadow);
 }
 
-body.mode-questions button#submitBtn {
-    border-radius: 10px;
-    box-shadow: var(--q-shadow);
-    font-weight: 600;
+body.mode-questions #songInput::placeholder {
+    color: var(--q-muted);
 }
 
 body.mode-questions li {
