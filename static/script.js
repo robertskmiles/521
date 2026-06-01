@@ -88,6 +88,10 @@
 
         document.body.className = "mode-" + mode;
 
+        // Favicon is a checked checkbox tinted with the mode's accent colour.
+        const favicon = document.getElementById("favicon");
+        if (favicon) favicon.href = "static/favicon-" + mode + ".svg";
+
         const heading = document.getElementById("heading");
         if (heading) heading.textContent = cfg.heading;
 
