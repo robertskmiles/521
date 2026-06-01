@@ -1,6 +1,7 @@
 services:
   - type: web
     name: letspick
+    branch: main
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
