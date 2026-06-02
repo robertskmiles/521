@@ -37,7 +37,7 @@ def bump(jam_id):
 mode_votes = {}
 
 VALID_MODES = ('songs', 'questions', 'general')
-DEFAULT_MODE = 'general'
+DEFAULT_MODE = 'questions'
 # Tie-break priority when vote counts are equal (first listed wins):
 MODE_PRIORITY = ('songs', 'questions', 'general')
 
