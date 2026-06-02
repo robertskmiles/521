@@ -117,10 +117,59 @@
         document.querySelectorAll("#modeMenuList button").forEach((btn) => {
           btn.classList.toggle("active", btn.dataset.mode === mode);
         });
+
+        // The form height differs by mode (questions is multiline), so re-centre
+        // the corner QR against the new layout.
+        layoutQr();
       }
 
       function toggleModeMenu() {
         document.getElementById("modeMenu").classList.toggle("open");
+      }
+
+      // Desktop-only: enlarge the corner QR to a big top-right overlay; click again
+      // to shrink. On mobile the QR already spans the full width, so do nothing.
+      function toggleQrZoom() {
+        if (window.matchMedia("(min-width: 750px)").matches) {
+          document.getElementById("qrWrap").classList.toggle("zoomed");
+        }
+      }
+
+      // Desktop-only: size the corner QR to the heading→form cluster and centre it
+      // vertically in the space beside the text box, so it sits evenly and grows
+      // when the box is taller (e.g. questions mode). Written as CSS custom props
+      // so the .zoomed overlay can still override. On mobile the QR is full-width
+      // in normal flow, so we clear the props and let CSS handle it.
+      function layoutQr() {
+        const wrap = document.getElementById("qrWrap");
+        if (!wrap) return;
+        if (!window.matchMedia("(min-width: 750px)").matches) {
+          wrap.style.removeProperty("--qr-size");
+          wrap.style.removeProperty("--qr-top");
+          return;
+        }
+        const heading = document.getElementById("heading");
+        const form = document.getElementById("submitform");
+        if (!heading || !form) return;
+        // Use document coordinates (add scrollY) so the fixed QR lands beside the
+        // form's natural position regardless of how far the page is scrolled.
+        const sy = window.scrollY;
+        const top = heading.getBoundingClientRect().top + sy;
+        const bottom = form.getBoundingClientRect().bottom + sy;
+        const MAX = 200; // QR column width beside the form
+        const MIN = 150;
+        const size = Math.max(MIN, Math.min(bottom - top, MAX));
+        const center = (top + bottom) / 2;
+        wrap.style.setProperty("--qr-size", size + "px");
+        wrap.style.setProperty("--qr-top", Math.round(center - size / 2) + "px");
+      }
+
+      // Keep the QR placement correct as the viewport changes or web fonts load
+      // (the questions-mode serif heading changes height once it arrives).
+      window.addEventListener("resize", layoutQr);
+      window.addEventListener("load", layoutQr);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(layoutQr);
       }
 
       // Close the gear menu on outside click or Escape.

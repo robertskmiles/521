@@ -19,20 +19,40 @@ body.mode-songs     { --accent: #4a90e2; --accent-dark: #357ab7; } /* blue  */
 body.mode-questions { --accent: #8f2f46; --accent-dark: #b64a62; } /* wine (Manifest/Waypoint conference theme — see end of file) */
 
 
-#qr {
+/* Base (mobile): QR sits full-width in normal flow, as before. No zoom affordance. */
+#qrWrap {
+    position: relative;
     padding-top: 50px;
+}
+
+#qr {
+    display: block;
     width: 100%; /* Adjust size as needed */
     height: auto;
 }
 
 @media only screen and (min-width: 750px) { /* Only float in the corner on bigger screens */
-  #qr {
+  /* The QR lives in the top-right corner as a floating widget you can click to zoom. */
+  #qrWrap {
       position: fixed;
-      bottom: 60px; /* Positions it above the footer */
+      /* JS (layoutQr) sets --qr-top / --qr-size to centre and size the QR in the
+         space beside the text box; these are the pre-JS fallbacks. */
+      top: var(--qr-top, 20px);
       right: 40px;
-      width: 183px; /* Adjust size as needed */
-      height: auto;
-      z-index: 100;
+      width: var(--qr-size, 183px);
+      padding-top: 0;
+      cursor: zoom-in;  /* magnifying-glass-with-plus cursor */
+      z-index: 150;
+      transition: width 0.25s ease, top 0.25s ease, right 0.25s ease;
+  }
+
+  /* Zoomed: a big square overlay anchored top-right. Fixed, so it hovers over the
+     page rather than reflowing anything. */
+  #qrWrap.zoomed {
+      width: min(48vw, 80vh);
+      top: 20px;
+      right: 20px;
+      cursor: zoom-out;  /* magnifying-glass-with-minus cursor */
   }
 }
 
@@ -151,11 +171,12 @@ button:hover {
     background-color: var(--accent-dark);
 }
 
-/* Mode switcher: gear icon + dropdown, top-right, out of the way. */
+/* Mode switcher: gear icon + dropdown, tucked into the bottom-right of the footer
+   (the top-right is now occupied by the QR code). */
 #modeMenu {
     position: fixed;
-    top: 12px;
-    right: 16px;
+    bottom: 4px;   /* vertically centres the gear in the 40px footer band */
+    right: 48px;   /* inset from the footer's right edge */
     z-index: 200;
 }
 
@@ -180,7 +201,8 @@ button:hover {
 #modeMenuList {
     display: none;
     position: absolute;
-    top: 36px;
+    top: auto;
+    bottom: 36px;  /* open upward, since the gear sits at the bottom */
     right: 0;
     margin: 0;
     list-style: none;
@@ -288,7 +310,8 @@ input[type="checkbox"] {
 .footer {
     position: absolute;  /* Position the footer at the bottom */
     bottom: 0;
-    width: 90%;
+    left: 40px;   /* span symmetrically with the body padding so its right edge */
+    right: 40px;  /* is predictable (the gear sits on it) */
     height: 40px;  /* Set the height of the footer */
     background-color: #f1f1f1;  /* A light grey background */
     text-align: center;  /* Center the text */
@@ -403,4 +426,23 @@ body.mode-questions .footer {
 }
 body.mode-questions .footer p {
     color: var(--q-muted);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Desktop layout overrides for the top-right QR. Kept at the end of the file
+   so they win over the equal-specificity base #submitform / body rules above
+   by source order.
+   ───────────────────────────────────────────────────────────────────────── */
+@media only screen and (min-width: 750px) {
+  /* Narrow the content so it clears the floating top-right QR (183px + gap). */
+  #submitform,
+  h1#heading,
+  h2 {
+      max-width: calc(100% - 240px);
+  }
+
+  /* The QR no longer reserves space at the bottom; just clear the footer. */
+  body {
+      padding-bottom: 80px;
+  }
 }
