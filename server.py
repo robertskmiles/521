@@ -5,6 +5,8 @@ import os
 import random
 import string
 import json
+import time
+from collections import deque
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret_key'
@@ -12,6 +14,48 @@ app.secret_key = 'secret_key'
 # Render (and most PaaS hosts) terminate TLS at a proxy and forward the request.
 # Trust the X-Forwarded-* headers so request.host_url reflects the real https host.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+# ---------------------------------------------------------------------------
+# Adaptive poll-rate control.
+#
+# The free-tier worker has a hard throughput ceiling (~0.1 CPU => ~125 req/s
+# after dropping to 2 threads). Past it a queue forms and every poll slows to
+# seconds. So we steer the *clients'* poll interval to keep the global request
+# rate under a budget: count all requests over a 1s window, and nudge a single
+# shared "suggested interval" up when we're over budget, down when under. This
+# is a feedback loop (TCP-congestion-style) that converges without needing to
+# know the user count, and decays back to POLL_MIN_MS when load is low so small
+# rooms stay snappy. Clients receive it as `poll_after` and use it as their
+# floor (see static/script.js).
+# ---------------------------------------------------------------------------
+RATE_BUDGET = 75            # target req/s, ~60% of the ceiling (leaves headroom)
+POLL_MIN_MS = 1000          # snappy floor when load is low
+POLL_MAX_MS = 8000          # never back clients off further than this
+_req_times = deque()        # monotonic timestamps of recent requests (1s window)
+_suggested_ms = POLL_MIN_MS
+_last_adjust = 0.0
+
+
+@app.before_request
+def _record_request():
+    # Count every request; polls dominate but actions cost CPU too.
+    _req_times.append(time.monotonic())
+
+
+def suggested_poll_ms():
+    global _suggested_ms, _last_adjust
+    now = time.monotonic()
+    while _req_times and _req_times[0] < now - 1.0:
+        _req_times.popleft()
+    rate = len(_req_times)  # requests in the last second
+    # Adjust at most once per second so the loop can't oscillate every request.
+    if now - _last_adjust >= 1.0:
+        if rate > RATE_BUDGET:
+            _suggested_ms = min(POLL_MAX_MS, _suggested_ms * 1.3)   # back off fast
+        else:
+            _suggested_ms = max(POLL_MIN_MS, _suggested_ms * 0.85)  # recover gently
+        _last_adjust = now
+    return int(_suggested_ms)
 
 def generate_short_id(length=8):
     # Use all letters and numbers, but skip confusing ones like l, I, O
@@ -239,17 +283,21 @@ def get_songs():
     client_v = request.args.get('v', type=int)
     current_v = versions.get(jam_id, 0)
     if client_v is not None and client_v == current_v:
-      return jsonify({'changed': False, 'version': current_v})
+      return jsonify({'changed': False, 'version': current_v, 'poll_after': suggested_poll_ms()})
 
-    # Serve the cached body if it was built for the current version; otherwise
-    # rebuild once and cache it for every other client polling at this version.
+    # Cache the expensive part (the sorted, serialized song list) per version, so
+    # we sort + serialize once per change and reuse it for every other poller.
+    # The small wrapper -- including the live `poll_after` hint -- is composed
+    # cheaply per request so the rate guidance stays fresh.
     cached = song_response_cache.get(jam_id)
     if cached is None or cached[0] != current_v:
         sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
-        body = json.dumps({'changed': True, 'version': current_v, 'mode': compute_mode(jam_id), 'songs': sorted_songs})
-        song_response_cache[jam_id] = (current_v, body)
+        songs_json = json.dumps(sorted_songs)
+        song_response_cache[jam_id] = (current_v, songs_json)
     else:
-        body = cached[1]
+        songs_json = cached[1]
+    body = '{"changed": true, "version": %d, "mode": %s, "poll_after": %d, "songs": %s}' % (
+        current_v, json.dumps(compute_mode(jam_id)), suggested_poll_ms(), songs_json)
     return app.response_class(body, mimetype='application/json')
 
 @app.route('/qr/<string:jam_id>.png')

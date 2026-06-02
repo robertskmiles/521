@@ -37,9 +37,33 @@
       };
       let currentMode = window.initialMode in MODES ? window.initialMode : "general";
 
+      // Adaptive poll floor. The server suggests an interval (`poll_after`) to
+      // keep the global request rate under its CPU budget; on top of that each
+      // client raises its own floor when its polls are slow or error out — a
+      // safety net for cold starts or a server too swamped to even advise. The
+      // effective floor is the max of both, so small/quiet rooms stay at 1s.
+      let serverPollFloor = 1000; // ms, from the server's poll_after hint
+      let latencyFloor = 1000;    // ms, client-side backoff on slow round-trips
+      const SLOW_RTT = 4000;      // a poll slower than this means we're struggling
+      function currentFloor() {
+        return Math.max(min_polling_wait, serverPollFloor, latencyFloor);
+      }
+      // Fold a poll's outcome into the adaptive floors: adopt the server's hint,
+      // and AIMD the client safety net (back off fast when slow, recover slowly).
+      function noteServerHints(payload, rttMs) {
+        if (payload && typeof payload.poll_after === "number") {
+          serverPollFloor = payload.poll_after;
+        }
+        if (rttMs > SLOW_RTT) {
+          latencyFloor = Math.min(max_polling_wait, latencyFloor * 1.5);
+        } else {
+          latencyFloor = Math.max(1000, latencyFloor * 0.9);
+        }
+      }
+
       const min_polling_wait = 1000; //1s
       const max_polling_wait = 15000; //15s
-      let polling_wait = min_polling_wait;
+      let polling_wait = currentFloor();
       // Last room version seen from the server. -1 never matches a real version,
       // so the first poll always pulls the full payload and syncs.
       let currentVersion = -1;
@@ -90,7 +114,7 @@
           updateSongList();
           songInput.value = ""; // Clear the text input
           songInput.focus(); // Set focus back to the input
-          polling_wait = min_polling_wait; // reset the polling wait time
+          polling_wait = currentFloor(); // reset the polling wait time
         }
       }
 
@@ -228,7 +252,7 @@
         if (data.status === "success") {
           applyMode(data.mode);
           updateSongList();
-          polling_wait = min_polling_wait;
+          polling_wait = currentFloor();
         }
       }
 
@@ -251,7 +275,7 @@
             updateSongList();
           }, 2000);
 
-          polling_wait = min_polling_wait;
+          polling_wait = currentFloor();
         }
       }
 
@@ -274,7 +298,7 @@
           updateSongList();
         }
 
-        polling_wait = min_polling_wait;
+        polling_wait = currentFloor();
       }
 
       async function hideSong(songName) {
@@ -294,7 +318,7 @@
           updateSongList();
         }
 
-        polling_wait = min_polling_wait;
+        polling_wait = currentFloor();
       }
 
       async function showSong(songName) {
@@ -314,7 +338,7 @@
           updateSongList();
         }
 
-        polling_wait = min_polling_wait;
+        polling_wait = currentFloor();
       }
 
       function getJamId() {
@@ -324,8 +348,11 @@
 
       async function updateSongList() {
         const jamId = getJamId();
+        const t0 = performance.now();
         const response = await apiFetch(`/get_songs?jam_id=${jamId}&v=${currentVersion}`);
         const payload = await response.json();
+        // Adopt the server's suggested poll interval + update the client safety net.
+        noteServerHints(payload, performance.now() - t0);
 
         // Server says nothing changed since our last version: skip the whole
         // re-render (avoids clearing/rebuilding both lists and checkbox flicker).
@@ -489,24 +516,28 @@
           // Pull down the new song list, storing whether anything changed
           songs_changed_p = await updateSongList();
 
+          const floor = currentFloor();
           if (songs_changed_p) {
-            // the song list changed, set the polling time to short
-            polling_wait = min_polling_wait;
+            // the song list changed, poll again at the floor for quick updates
+            polling_wait = floor;
           } else {
-            // Nothing changed, take longer to poll next time
-            polling_wait = polling_wait * 1.5;
-            if (polling_wait > max_polling_wait) {
-              polling_wait = max_polling_wait;
-            }
+            // Nothing changed, take longer to poll next time (but never below
+            // the floor the server/our-safety-net is asking for)
+            polling_wait = Math.min(max_polling_wait, polling_wait * 1.5);
+            if (polling_wait < floor) polling_wait = floor;
           }
         } catch (err) {
-          // Connection problem (apiFetch already showed the banner). Keep
-          // retrying at the short interval so we recover quickly once it's back.
-          polling_wait = min_polling_wait;
+          // Connection/overload problem (apiFetch already showed the banner).
+          // Raise the client safety-net floor so we don't hammer a struggling
+          // server, then retry — recovering once it's healthy again.
+          latencyFloor = Math.min(max_polling_wait, latencyFloor * 1.5);
+          polling_wait = currentFloor();
         }
         console.log(polling_wait, songs_changed_p, connected);
-        // Always reschedule, even after an error, so polling never silently dies.
-        setTimeout(pollSongList, polling_wait);
+        // Jitter (±15%) so hundreds of clients don't poll in lockstep, then
+        // reschedule — always, so polling never silently dies.
+        const jittered = polling_wait * (0.85 + Math.random() * 0.3);
+        setTimeout(pollSongList, jittered);
       }
 
       // Apply the server-provided initial mode immediately (avoids a flash),
