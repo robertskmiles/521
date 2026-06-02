@@ -61,6 +61,29 @@ a {
     text-decoration: none;
 }
 
+/* Connection-lost banner: pinned across the top, hidden until JS adds .show
+   when a request fails. Slides down so it's noticeable but not jarring. */
+#connectionBanner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 10px 16px;
+    background-color: #c0392b;
+    color: #ffffff;
+    text-align: center;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transform: translateY(-100%);
+    transition: transform 0.25s ease;
+}
+
+#connectionBanner.show {
+    transform: translateY(0);
+}
+
 body {
     background-color: #f3f4f6;
     /*leave space at the bottom for the QR code*/

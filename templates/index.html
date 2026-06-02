@@ -17,6 +17,12 @@
     </script>
   </head>
   <body class="mode-{{ mode }}">
+    <!-- Connection-lost banner: hidden until a poll/action fails, shown again
+         once a request succeeds. -->
+    <div id="connectionBanner" role="status" aria-live="polite">
+      No connection — trying to reconnect…
+    </div>
+
     <!-- Mode switcher: unobtrusive gear icon + dropdown -->
     <div id="modeMenu">
       <button id="modeGear" type="button" title="Change mode" aria-label="Change mode" onclick="toggleModeMenu()">&#9881;</button>

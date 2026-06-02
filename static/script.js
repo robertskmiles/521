@@ -47,10 +47,35 @@
       // let jamIdTimer;
       let listSortTimer;
 
+      // Connection state. The banner shows whenever a request fails (network
+      // down, server down, HTTP error) and hides again on the next success.
+      let connected = true;
+      function setConnected(ok) {
+        if (ok === connected) return;
+        connected = ok;
+        const banner = document.getElementById("connectionBanner");
+        if (banner) banner.classList.toggle("show", !ok);
+      }
+
+      // fetch wrapper that tracks connection state: a thrown error (offline) or a
+      // non-OK response (server error) shows the banner and rethrows; a good
+      // response clears it. All API calls go through this.
+      async function apiFetch(url, options) {
+        try {
+          const response = await fetch(url, options);
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          setConnected(true);
+          return response;
+        } catch (err) {
+          setConnected(false);
+          throw err;
+        }
+      }
+
 
       async function submitSong() {
         const songName = document.getElementById("songInput").value;
-        const response = await fetch("/submit", {
+        const response = await apiFetch("/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -189,7 +214,7 @@
       // (which may differ from the pick if the user is outvoted).
       async function setMode(mode) {
         document.getElementById("modeMenu").classList.remove("open");
-        const response = await fetch("/set_mode", {
+        const response = await apiFetch("/set_mode", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -208,7 +233,7 @@
       }
 
       async function toggleSong(songName) {
-        const response = await fetch("/toggle", {
+        const response = await apiFetch("/toggle", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -231,7 +256,7 @@
       }
 
       async function toggleHidden(songName) {
-        const response = await fetch("/togglehidden", {
+        const response = await apiFetch("/togglehidden", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -253,7 +278,7 @@
       }
 
       async function hideSong(songName) {
-        const response = await fetch("/hide", {
+        const response = await apiFetch("/hide", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -273,7 +298,7 @@
       }
 
       async function showSong(songName) {
-        const response = await fetch("/show", {
+        const response = await apiFetch("/show", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -299,7 +324,7 @@
 
       async function updateSongList() {
         const jamId = getJamId();
-        const response = await fetch(`/get_songs?jam_id=${jamId}&v=${currentVersion}`);
+        const response = await apiFetch(`/get_songs?jam_id=${jamId}&v=${currentVersion}`);
         const payload = await response.json();
 
         // Server says nothing changed since our last version: skip the whole
@@ -460,20 +485,27 @@
       }
 
       async function pollSongList() {
-        // Pull down the new song list, storing whether anything changed
-        songs_changed_p = await updateSongList();
+        try {
+          // Pull down the new song list, storing whether anything changed
+          songs_changed_p = await updateSongList();
 
-        if (songs_changed_p) {
-          // the song list changed, set the polling time to short
-          polling_wait = min_polling_wait;
-        } else {
-          // Nothing changed, take longer to poll next time
-          polling_wait = polling_wait * 1.5;
-          if (polling_wait > max_polling_wait) {
-            polling_wait = max_polling_wait;
+          if (songs_changed_p) {
+            // the song list changed, set the polling time to short
+            polling_wait = min_polling_wait;
+          } else {
+            // Nothing changed, take longer to poll next time
+            polling_wait = polling_wait * 1.5;
+            if (polling_wait > max_polling_wait) {
+              polling_wait = max_polling_wait;
+            }
           }
+        } catch (err) {
+          // Connection problem (apiFetch already showed the banner). Keep
+          // retrying at the short interval so we recover quickly once it's back.
+          polling_wait = min_polling_wait;
         }
-        console.log(polling_wait, songs_changed_p);
+        console.log(polling_wait, songs_changed_p, connected);
+        // Always reschedule, even after an error, so polling never silently dies.
         setTimeout(pollSongList, polling_wait);
       }
 
