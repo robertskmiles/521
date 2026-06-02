@@ -31,6 +31,13 @@ versions = {}
 def bump(jam_id):
     versions[jam_id] = versions.get(jam_id, 0) + 1
 
+# Cache of the serialized /get_songs response per room: {jam_id: (version, body)}.
+# The response is identical for every client at a given version (it carries only
+# room-global state), so we sort + serialize once per version bump and hand the
+# same JSON string to every poller. In a busy room this collapses N per-client
+# serializations into one, which is the dominant cost under load.
+song_response_cache = {}
+
 # Per-room mode votes: {jam_id: {user_id: 'songs'|'questions'|'general'}}
 # A user who hasn't picked a mode sees the majority pick among those who have,
 # mirroring the no-central-authority hide/show voting (see update_default_hidden).
@@ -234,8 +241,16 @@ def get_songs():
     if client_v is not None and client_v == current_v:
       return jsonify({'changed': False, 'version': current_v})
 
-    sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
-    return jsonify({'changed': True, 'version': current_v, 'mode': compute_mode(jam_id), 'songs': sorted_songs})
+    # Serve the cached body if it was built for the current version; otherwise
+    # rebuild once and cache it for every other client polling at this version.
+    cached = song_response_cache.get(jam_id)
+    if cached is None or cached[0] != current_v:
+        sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
+        body = json.dumps({'changed': True, 'version': current_v, 'mode': compute_mode(jam_id), 'songs': sorted_songs})
+        song_response_cache[jam_id] = (current_v, body)
+    else:
+        body = cached[1]
+    return app.response_class(body, mimetype='application/json')
 
 @app.route('/qr/<string:jam_id>.png')
 def generate_qr(jam_id):
