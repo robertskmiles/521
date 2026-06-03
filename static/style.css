@@ -278,6 +278,17 @@ ul {
     margin-top: 20px;
 }
 
+/* The "Check the box…" prompt and the "Already Asked/Played:" label each sit
+   right above a list (which carries its own margin-top), so they looked
+   bottom-heavy. Add breathing room above them to balance the spacing. */
+#likePrompt {
+    margin-top: 24px;
+}
+
+#itemList2Label {
+    margin-top: 24px;
+}
+
 
 li {
     background-color: #ffffff;
@@ -328,6 +339,29 @@ input[type="checkbox"] {
 .item-text {
   background-color: #ff0000;
   text-decoration: none;
+}
+
+/* Completed items (Done / Already Played / Already Asked) live in #itemList2.
+   They share the live-item markup, so de-emphasise them here: faded, slightly
+   desaturated, flat (no shadow), with the text struck through. Hovering brings
+   a card back to full strength so it stays readable and easy to un-complete.
+   Mode-agnostic (works on the songs/general cards and the questions paper
+   cards alike) since it leans on opacity/filter rather than fixed colours. */
+#itemList2 li {
+    opacity: 0.55;
+    filter: grayscale(0.5);
+    box-shadow: none;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+#itemList2 li > span:first-child {
+    text-decoration: line-through;
+    text-decoration-color: #999999;
+}
+
+#itemList2 li:hover {
+    opacity: 0.95;
+    filter: grayscale(0);
 }
 
 .footer {
