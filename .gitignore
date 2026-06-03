@@ -7,3 +7,4 @@ __pycache__/
 .bash_history
 .glitch-assets
 static/qr/
+static/favicon-backups/
