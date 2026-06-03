@@ -271,6 +271,100 @@ button:hover {
 }
 
 
+/* Title-as-switcher: the last word of the heading ("song"/"question"/"thing")
+   is a clickable inline mode switcher. A dotted underline + pointer cursor hint
+   that it's interactive. Clicking opens a dropdown whose items are styled like
+   the heading word itself — every mode's noun, current one first and sitting in
+   the trigger word's own spot — so it reads as if the word was always the top
+   of a hidden list. The trigger is hidden while open (its space reserved) so
+   the first list item slots cleanly into place. */
+.noun-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.mode-noun {
+    cursor: pointer;
+    text-decoration: underline dotted;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    /* Faded underline at rest so it's a quiet hint, not a distraction; it firms
+       up (solid + full colour) on hover. */
+    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+    transition: text-decoration-color 0.15s ease;
+}
+
+.mode-noun:hover {
+    text-decoration-style: solid;
+    text-decoration-color: currentColor;
+}
+
+/* Hide (but keep the space for) the trigger word while the menu is open; the
+   menu's first item takes its place. */
+.noun-menu.open .mode-noun {
+    visibility: hidden;
+}
+
+.noun-menu-list {
+    display: none;
+    position: absolute;
+    /* Offsets cancel the list/button padding so the first item's text lands
+       exactly on the trigger word (list pad 6/14 + button pad 4/0). */
+    top: -10px;
+    left: -14px;
+    margin: 0;
+    padding: 6px 14px;
+    z-index: 200;
+    list-style: none;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+    /* Inherit the heading's font/size/weight so items look like the title word. */
+    font: inherit;
+}
+
+.noun-menu.open .noun-menu-list {
+    display: block;
+}
+
+.noun-menu-list li {
+    background: none;
+    margin: 0;
+    padding: 0;
+    display: block;
+    border-radius: 0;
+}
+
+.noun-menu-list button {
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 4px 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    /* Match the heading word: same font/size (inherited), accent colour, and the
+       dotted underline affordance. */
+    font: inherit;
+    color: var(--accent);
+    line-height: 1.15;
+    text-decoration: underline dotted;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    /* Same quiet underline as the trigger word; firms up on hover. */
+    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.noun-menu-list button:hover {
+    background: none;
+    color: var(--accent-dark);
+    text-decoration-style: solid;
+    text-decoration-color: currentColor;
+}
 
 
 ul {
@@ -487,6 +581,29 @@ body.mode-questions #modeMenuList button {
 body.mode-questions #modeMenuList button:hover {
     background: #852f4014;  /* accent wash */
     color: var(--q-ink);
+}
+
+/* Title-noun dropdown on paper. The heading word here is ink-coloured serif
+   (the h1 sets that and the items inherit the font), so the items use ink too —
+   keeping the seamless "word expanded into a list" look. */
+body.mode-questions .noun-menu-list {
+    background: var(--q-paper);
+    box-shadow: var(--q-shadow);
+}
+/* The general `body.mode-questions li` paper-card rule (border + radius +
+   shadow) is more specific than the base .noun-menu-list li reset, so it gives
+   each menu item its own little rectangle. Override it back to flat here. */
+body.mode-questions .noun-menu-list li {
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+body.mode-questions .noun-menu-list button {
+    color: var(--q-ink);
+}
+body.mode-questions .noun-menu-list button:hover {
+    color: var(--accent);  /* wine on hover */
 }
 
 body.mode-questions .footer {

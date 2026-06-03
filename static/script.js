@@ -6,6 +6,7 @@
       const MODES = {
         general: {
           heading: "Let's Pick a thing",
+          noun: "thing",
           placeholder: "Type a suggestion here",
           likePrompt: "Check the box for each you like:",
           completed: "Done:",
@@ -16,6 +17,7 @@
         },
         songs: {
           heading: "Let's Pick a song",
+          noun: "song",
           placeholder: "Type a song here",
           likePrompt: "Check the box for each you like:",
           completed: "Already Played:",
@@ -26,6 +28,7 @@
         },
         questions: {
           heading: "Let's Pick a question",
+          noun: "question",
           placeholder: "Type your question here",
           likePrompt: "Check the box for each you'd like asked:",
           completed: "Already Asked:",
@@ -129,6 +132,58 @@
           }
         });
 
+      // Build the heading as "Let's Pick a <noun>", where <noun> is itself the
+      // mode switcher. Clicking it opens a dropdown styled like the heading word
+      // itself, so it reads as if the word was always the top of a hidden list:
+      // every mode's noun is listed (current one first, in the word's own spot),
+      // and picking one switches mode (same path as the gear menu). The trigger
+      // word is hidden while open so the first list item takes its place.
+      function renderHeading(mode) {
+        const heading = document.getElementById("heading");
+        if (!heading) return;
+
+        heading.textContent = "Let's Pick a ";  // trailing space before the noun
+
+        const menu = document.createElement("span");
+        menu.id = "nounMenu";
+        menu.className = "noun-menu";
+
+        const noun = document.createElement("span");
+        noun.id = "modeNoun";
+        noun.className = "mode-noun";
+        noun.textContent = MODES[mode].noun;
+        noun.title = "Click to switch mode";
+        noun.onclick = toggleNounMenu;
+        menu.appendChild(noun);
+
+        const list = document.createElement("ul");
+        list.id = "nounMenuList";
+        list.className = "noun-menu-list";
+        // Current mode first so its item lands where the trigger word already is;
+        // then the rest in a stable order so the menu never reshuffles.
+        const order = [mode, ...["general", "songs", "questions"].filter((m) => m !== mode)];
+        for (const m of order) {
+          const li = document.createElement("li");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = MODES[m].noun;
+          if (m === mode) btn.classList.add("current");
+          btn.onclick = function () {
+            menu.classList.remove("open");
+            // Picking the current mode is a no-op beyond closing the menu.
+            if (m !== currentMode) setMode(m);
+          };
+          li.appendChild(btn);
+          list.appendChild(li);
+        }
+        menu.appendChild(list);
+        heading.appendChild(menu);
+      }
+
+      function toggleNounMenu() {
+        document.getElementById("nounMenu").classList.toggle("open");
+      }
+
       // Apply the given mode to the UI (strings, styling, input behaviour).
       function applyMode(mode) {
         if (!(mode in MODES)) mode = "general";
@@ -141,8 +196,7 @@
         const favicon = document.getElementById("favicon");
         if (favicon) favicon.href = "static/favicon-" + mode + ".svg";
 
-        const heading = document.getElementById("heading");
-        if (heading) heading.textContent = cfg.heading;
+        renderHeading(mode);
 
         const likePrompt = document.getElementById("likePrompt");
         if (likePrompt) likePrompt.textContent = cfg.likePrompt;
@@ -221,16 +275,21 @@
         document.fonts.ready.then(layoutQr);
       }
 
-      // Close the gear menu on outside click or Escape.
+      // Close the gear menu and the title-noun menu on outside click or Escape.
       document.addEventListener("click", function (event) {
-        const menu = document.getElementById("modeMenu");
-        if (menu && !menu.contains(event.target)) {
-          menu.classList.remove("open");
+        for (const id of ["modeMenu", "nounMenu"]) {
+          const menu = document.getElementById(id);
+          if (menu && !menu.contains(event.target)) {
+            menu.classList.remove("open");
+          }
         }
       });
       document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
-          document.getElementById("modeMenu").classList.remove("open");
+          for (const id of ["modeMenu", "nounMenu"]) {
+            const menu = document.getElementById(id);
+            if (menu) menu.classList.remove("open");
+          }
         }
       });
 
