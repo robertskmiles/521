@@ -348,6 +348,18 @@ input[type="checkbox"] {
     font-size: 14px;  /* Adjust font size */
 }
 
+.footer a {
+    color: inherit;  /* Blend with the footer text rather than default blue */
+    text-decoration: underline;
+    text-decoration-color: #b0b0b0;  /* Subtle grey underline */
+    text-underline-offset: 2px;
+    transition: text-decoration-color 0.15s ease;
+}
+
+.footer a:hover {
+    text-decoration-color: #333333;  /* Underline darkens on hover */
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────────
    Questions mode: match the "look and feel" of the Manifest/Waypoint
