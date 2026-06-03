@@ -83,8 +83,9 @@ def bump(room_id):
 item_response_cache = {}
 
 # Per-room mode votes: {room_id: {user_id: 'songs'|'questions'|'general'}}
-# A user who hasn't picked a mode sees the majority pick among those who have,
-# mirroring the no-central-authority hide/show voting (see update_default_hidden).
+# Mirrors the no-central-authority hide/show voting (see update_default_hidden):
+# a user who HAS picked a mode sees their own pick; a user who hasn't sees the
+# consensus (plurality) among those who have.
 mode_votes = {}
 
 VALID_MODES = ('songs', 'questions', 'general')
@@ -93,14 +94,20 @@ DEFAULT_MODE = 'questions'
 MODE_PRIORITY = ('songs', 'questions', 'general')
 
 
-def compute_mode(room_id):
+def compute_mode(room_id, user_id=None):
     votes = mode_votes.get(room_id, {})
+    # You always control your own view: if you've picked a mode, you see it,
+    # regardless of how the room voted (mirrors an explicit hide/show setting
+    # overriding the consensus default for your view).
+    if user_id is not None and user_id in votes:
+        return votes[user_id]
     if not votes:
         return DEFAULT_MODE
     counts = {mode: 0 for mode in VALID_MODES}
     for mode in votes.values():
         if mode in counts:
             counts[mode] += 1
+    # No personal pick: fall back to the consensus among those who have picked.
     # Highest count wins; ties broken by MODE_PRIORITY order.
     return max(MODE_PRIORITY, key=lambda mode: counts[mode])
 
@@ -129,7 +136,7 @@ def index(room_id="default"):
 
     user_submitted_items = [item['text'] for item in items.get(room_id, []) if user_id in item['submitters']]
 
-    response = make_response(render_template('index.html', room_id=room_id, items=items.get(room_id, []), user_submitted_items=user_submitted_items, user_id=user_id, mode=compute_mode(room_id)))
+    response = make_response(render_template('index.html', room_id=room_id, items=items.get(room_id, []), user_submitted_items=user_submitted_items, user_id=user_id, mode=compute_mode(room_id, user_id)))
     response.set_cookie('user_id', user_id, max_age=60*60*24)  # Set cookie to expire after 1 day
 
     return response
@@ -267,13 +274,16 @@ def set_mode():
     mode_votes.setdefault(room_id, {})[user_id] = mode
     bump(room_id)
 
-    # Return the new effective mode (may differ from the user's pick if outvoted).
-    return jsonify({'status': 'success', 'mode': compute_mode(room_id)})
+    # Return this user's effective mode: now that they've voted, that's their pick.
+    return jsonify({'status': 'success', 'mode': compute_mode(room_id, user_id)})
 
 
 @app.route('/get_items', methods=['GET'])
 def get_items():
     room_id = request.args.get('room_id', 'default')
+    # The mode is per-viewer (you see your own pick), so we need to know who's
+    # asking; the cookie is set on the initial page load.
+    user_id = request.cookies.get('user_id')
     if not items.get(room_id, None):
       items[room_id] = []
 
@@ -296,7 +306,7 @@ def get_items():
     else:
         items_json = cached[1]
     body = '{"changed": true, "version": %d, "mode": %s, "poll_after": %d, "items": %s}' % (
-        current_v, json.dumps(compute_mode(room_id)), suggested_poll_ms(), items_json)
+        current_v, json.dumps(compute_mode(room_id, user_id)), suggested_poll_ms(), items_json)
     return app.response_class(body, mimetype='application/json')
 
 @app.route('/qr/<string:room_id>.png')
