@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="static/style.css" />
         <script>
       window.userId = "{{ user_id }}";
-      window.jamId = "{{ jam_id }}";
+      window.roomId = "{{ room_id }}";
       window.initialMode = "{{ mode }}";
     </script>
   </head>
@@ -34,26 +34,26 @@
     </div>
 
     <h1 id="heading">{{ {'songs': "Let's Pick a song", 'questions': "Let's Pick a question"}.get(mode, "Let's Pick a thing") }}</h1>
-    <h2>{{ request.host }}/{{jam_id}}</h2>
+    <h2>{{ request.host }}/{{room_id}}</h2>
 <br/>
     <div id="submitform">
-      <textarea id="songInput" rows="1" placeholder="Type a suggestion here"></textarea>
-      <button onclick="submitSong()" id="submitBtn">Submit</button>
+      <textarea id="itemInput" rows="1" placeholder="Type a suggestion here"></textarea>
+      <button onclick="submitItem()" id="submitBtn">Submit</button>
     </div>
 
     <p id="likePrompt">Check the box for each you like:</p>
-    <ul id="songList">
+    <ul id="itemList">
       <p style="color: grey; font-style: italic;">No suggestions yet</p></br>
     </ul>
-    <div id="songList2Label">
+    <div id="itemList2Label">
       <p>Done:</p>
     </div>
-    <ul id="songList2">
+    <ul id="itemList2">
       <!-- woohoo -->
     </ul>
 
     <div id="qrWrap" onclick="toggleQrZoom()" title="Click to enlarge">
-      <img id="qr" src="qr/{{jam_id}}.png" />
+      <img id="qr" src="qr/{{room_id}}.png" />
     </div>
 
     <div class="footer">
@@ -61,7 +61,7 @@
     </div>
     <script>
        userId = "{{ user_id }}";
-       jamId = "{{ jam_id }}";
+       roomId = "{{ room_id }}";
     </script>
     <script src="static/script.js"></script>
   </body>

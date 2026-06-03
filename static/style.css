@@ -140,7 +140,7 @@ input[type="text"], textarea, button {
     border-color: var(--accent);
 }
 
-#songInput {
+#itemInput {
     display: block;
     width: 100%;
     max-width: none;
@@ -285,19 +285,19 @@ li {
     margin-bottom: 10px;
     border-radius: 5px;
     display: grid;  /* Changed to grid */
-    grid-template-columns: 1fr auto auto auto;  /* 1st column for song name, 2nd for checkbox, 3rd for fan count */
+    grid-template-columns: 1fr auto auto auto;  /* 1st column for item text, 2nd for checkbox, 3rd for vote count */
     align-items: center;
     gap: 10px;  /* spacing between grid items */
 }
 
-.hide-song-link {
+.hide-item-link {
     margin-left: 10px;  /* Add spacing to keep it from touching the other content */
     color: #ff0000;     /* Optional: Change color to red or whatever you prefer */
     cursor: pointer;
     text-decoration: none; /* Ensure the link doesn't have an underline */
 }
 
-.hide-song-link:hover {
+.hide-item-link:hover {
     text-decoration: underline;  /* Optionally add underline on hover */
 }
 
@@ -311,7 +311,7 @@ li span {
 }
 */
 
-.fans-span {
+.count-span {
   width:5em;
   align-items: center;
   text-align:center;
@@ -319,13 +319,13 @@ li span {
 }
 
 input[type="checkbox"] {
-    margin: 5px;   /* This provides spacing between checkbox and the fan count */
+    margin: 5px;   /* This provides spacing between checkbox and the count */
     accent-color: var(--accent);
-  
+
 /*     padding: 7px 0;  /* Add padding to center the text vertically */
 }
 
-.songname_span {
+.item-text {
   background-color: #ff0000;
   text-decoration: none;
 }
@@ -398,7 +398,7 @@ body.mode-questions #likePrompt {
 
 /* "Asked:" rendered as a small uppercase tracked label, like the
    conference's "SESSION IDEA" eyebrow text */
-body.mode-questions #songList2Label p {
+body.mode-questions #itemList2Label p {
     color: var(--q-muted);
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -413,7 +413,7 @@ body.mode-questions #submitform {
     box-shadow: var(--q-shadow);
 }
 
-body.mode-questions #songInput::placeholder {
+body.mode-questions #itemInput::placeholder {
     color: var(--q-muted);
 }
 
@@ -426,17 +426,17 @@ body.mode-questions li {
 
 /* secondary text muted, the question text itself ink */
 body.mode-questions li span,
-body.mode-questions .fans-span {
+body.mode-questions .count-span {
     color: var(--q-muted);
 }
 body.mode-questions li > span:first-child {
     color: var(--q-ink);
 }
 
-body.mode-questions .hide-song-link {
+body.mode-questions .hide-item-link {
     color: var(--q-muted);
 }
-body.mode-questions .hide-song-link:hover {
+body.mode-questions .hide-item-link:hover {
     color: var(--accent);
 }
 

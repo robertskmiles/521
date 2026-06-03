@@ -68,7 +68,7 @@
       // so the first poll always pulls the full payload and syncs.
       let currentVersion = -1;
 
-      // let jamIdTimer;
+      // let roomIdTimer;
       let listSortTimer;
 
       // Connection state. The banner shows whenever a request fails (network
@@ -97,35 +97,35 @@
       }
 
 
-      async function submitSong() {
-        const songName = document.getElementById("songInput").value;
+      async function submitItem() {
+        const itemText = document.getElementById("itemInput").value;
         const response = await apiFetch("/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jam_id: getJamId(),
-            song: songName,
+            room_id: getRoomId(),
+            text: itemText,
             user_id: userId,
           }),
         });
 
         const data = await response.json();
         if (data.status === "success") {
-          updateSongList();
-          songInput.value = ""; // Clear the text input
-          songInput.focus(); // Set focus back to the input
+          updateItemList();
+          itemInput.value = ""; // Clear the text input
+          itemInput.focus(); // Set focus back to the input
           polling_wait = currentFloor(); // reset the polling wait time
         }
       }
 
       document
-        .getElementById("songInput")
+        .getElementById("itemInput")
         .addEventListener("keydown", function (event) {
           // In multiline (questions) mode, Enter inserts a newline; submit via
           // the button. Otherwise Enter submits (unless Shift is held).
           if (event.key === "Enter" && !MODES[currentMode].multiline && !event.shiftKey) {
             event.preventDefault();
-            submitSong();
+            submitItem();
           }
         });
 
@@ -147,10 +147,10 @@
         const likePrompt = document.getElementById("likePrompt");
         if (likePrompt) likePrompt.textContent = cfg.likePrompt;
 
-        const completedLabel = document.querySelector("#songList2Label p");
+        const completedLabel = document.querySelector("#itemList2Label p");
         if (completedLabel) completedLabel.textContent = cfg.completed;
 
-        const input = document.getElementById("songInput");
+        const input = document.getElementById("itemInput");
         if (input) {
           input.placeholder = cfg.placeholder;
           if (cfg.multiline) {
@@ -242,7 +242,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jam_id: getJamId(),
+            room_id: getRoomId(),
             mode: mode,
             user_id: userId,
           }),
@@ -251,18 +251,18 @@
         const data = await response.json();
         if (data.status === "success") {
           applyMode(data.mode);
-          updateSongList();
+          updateItemList();
           polling_wait = currentFloor();
         }
       }
 
-      async function toggleSong(songName) {
+      async function toggleItem(itemText) {
         const response = await apiFetch("/toggle", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jam_id: getJamId(),
-            song: songName,
+            room_id: getRoomId(),
+            text: itemText,
             user_id: userId,
           }),
         });
@@ -272,20 +272,20 @@
           // Don't resort everything immediately, wait a bit for the user to stop clicking
           clearTimeout(listSortTimer);
           listSortTimer = setTimeout(() => {
-            updateSongList();
+            updateItemList();
           }, 2000);
 
           polling_wait = currentFloor();
         }
       }
 
-      async function toggleHidden(songName) {
+      async function toggleHidden(itemText) {
         const response = await apiFetch("/togglehidden", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jam_id: getJamId(),
-            song: songName,
+            room_id: getRoomId(),
+            text: itemText,
             user_id: userId,
           }),
         });
@@ -295,19 +295,19 @@
         console.log("hiding");
         console.log(data);
         if (data.status === "success") {
-          updateSongList();
+          updateItemList();
         }
 
         polling_wait = currentFloor();
       }
 
-      async function hideSong(songName) {
+      async function hideItem(itemText) {
         const response = await apiFetch("/hide", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jam_id: getJamId(),
-            song: songName,
+            room_id: getRoomId(),
+            text: itemText,
             user_id: userId,
           }),
         });
@@ -315,19 +315,19 @@
         const data = await response.json();
 
         if (data.status === "success") {
-          updateSongList();
+          updateItemList();
         }
 
         polling_wait = currentFloor();
       }
 
-      async function showSong(songName) {
+      async function showItem(itemText) {
         const response = await apiFetch("/show", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            jam_id: getJamId(),
-            song: songName,
+            room_id: getRoomId(),
+            text: itemText,
             user_id: userId,
           }),
         });
@@ -335,21 +335,20 @@
         const data = await response.json();
 
         if (data.status === "success") {
-          updateSongList();
+          updateItemList();
         }
 
         polling_wait = currentFloor();
       }
 
-      function getJamId() {
-        // return document.getElementById("jamIdInput").value;
-        return window.jamId;
+      function getRoomId() {
+        return window.roomId;
       }
 
-      async function updateSongList() {
-        const jamId = getJamId();
+      async function updateItemList() {
+        const roomId = getRoomId();
         const t0 = performance.now();
-        const response = await apiFetch(`/get_songs?jam_id=${jamId}&v=${currentVersion}`);
+        const response = await apiFetch(`/get_items?room_id=${roomId}&v=${currentVersion}`);
         const payload = await response.json();
         // Adopt the server's suggested poll interval + update the client safety net.
         noteServerHints(payload, performance.now() - t0);
@@ -362,31 +361,31 @@
         }
 
         currentVersion = payload.version;
-        songs_changed_p = true;
-        const songs = payload.songs || [];
+        items_changed_p = true;
+        const items = payload.items || [];
 
         // Effective mode can change as others vote; apply it before rendering.
         if (payload.mode && payload.mode !== currentMode) {
           applyMode(payload.mode);
         }
 
-        const songList = document.getElementById("songList");
+        const itemList = document.getElementById("itemList");
 
-        songList.innerHTML = ""; // Clear the current list
+        itemList.innerHTML = ""; // Clear the current list
 
-        function createSongLi(song, songlist) {
+        function createItemLi(item, itemlist) {
           const li = document.createElement("li");
 
-          const songname_span = document.createElement("span");
-          songname_span.textContent = `${song.song}     `;
-          li.appendChild(songname_span);
+          const item_text_span = document.createElement("span");
+          item_text_span.textContent = `${item.text}     `;
+          li.appendChild(item_text_span);
 
           // Song-specific helper links (YouTube + chords) only in songs mode.
           if (MODES[currentMode].links) {
             // Create YouTube search link
             const youtubeLink = document.createElement("a");
             youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-              song.song
+              item.text
             )}`;
             youtubeLink.target = "_blank"; // Open link in a new tab/window
             youtubeLink.title = `Search for song on YouTube`;
@@ -394,12 +393,12 @@
             const youtubeIcon = document.createTextNode(" ▶️ ");
             youtubeLink.appendChild(youtubeIcon);
 
-            songname_span.appendChild(youtubeLink);
+            item_text_span.appendChild(youtubeLink);
 
             // Create chord search link
             const chordsLink = document.createElement("a");
             chordsLink.href = `https://www.google.com/search?q=${encodeURIComponent(
-              song.song + " chords"
+              item.text + " chords"
             )}`;
             chordsLink.target = "_blank"; // Open link in a new tab/window
             chordsLink.title = `Search for chords on Google`;
@@ -407,45 +406,45 @@
             const chordsIcon = document.createTextNode(" 🎸 ");
             chordsLink.appendChild(chordsIcon);
 
-            songname_span.appendChild(chordsLink);
+            item_text_span.appendChild(chordsLink);
           }
 
-          // Create checkbox for liking songs
+          // Create checkbox for liking items
           const checkboxDiv = document.createElement("div");
           checkboxDiv.className = "checkbox-container";
-          checkboxDiv.title = "I like this song";
+          checkboxDiv.title = "I like this";
 
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
-          if (song.submitters.includes(userId)) {
+          if (item.submitters.includes(userId)) {
             checkbox.checked = true;
           }
           checkbox.onclick = function () {
-            toggleSong(song.song);
+            toggleItem(item.text);
           };
           checkboxDiv.appendChild(checkbox);
           li.appendChild(checkboxDiv);
 
           // How many fans/votes does the suggestion have?
-          const fanText =
-            song.submitters.length === 1
+          const countText =
+            item.submitters.length === 1
               ? MODES[currentMode].unit1
               : MODES[currentMode].unitN;
-          const fans_span = document.createElement("span");
-          fans_span.textContent = `(${song.submitters.length} ${fanText})`;
-          fans_span.className = "fans-span";
-          li.appendChild(fans_span);
+          const count_span = document.createElement("span");
+          count_span.textContent = `(${item.submitters.length} ${countText})`;
+          count_span.className = "count-span";
+          li.appendChild(count_span);
 
           // Add hide/un-hide link
           const hideLink = document.createElement("a");
-          
+
           hideLink.href = "#"; // No actual navigation, just a link
-          hideLink.className = "hide-song-link"; // Optional class for styling
-          if (songlist === 1) {
+          hideLink.className = "hide-item-link"; // Optional class for styling
+          if (itemlist === 1) {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
             hideLink.title = MODES[currentMode].markDone;
 
-          } else if (songlist === 2) {
+          } else if (itemlist === 2) {
             hideLink.innerHTML = "&times;"; // Unicode 'x'
             hideLink.title = MODES[currentMode].markUndone;
 
@@ -453,72 +452,72 @@
           hideLink.onclick = function (event) {
             event.preventDefault(); // Prevent default link behavior
 
-            if (songlist === 1) {
-              hideSong(song.song);
-            } else if (songlist === 2) {
-              showSong(song.song);
+            if (itemlist === 1) {
+              hideItem(item.text);
+            } else if (itemlist === 2) {
+              showItem(item.text);
             }
-            updateSongList();
+            updateItemList();
           };
           li.appendChild(hideLink);
 
           return li;
         }
 
-        console.log(songs.length);
-        if (songs.length === 0) {
+        console.log(items.length);
+        if (items.length === 0) {
           const li = document.createElement("li");
           li.textContent = "No suggestions yet";
           li.style.fontStyle = "italic";
           li.style.color = "grey";
-          songList.appendChild(li);
-          // songList.innerHTML = "<p>No suggestions yet</p>";
+          itemList.appendChild(li);
+          // itemList.innerHTML = "<p>No suggestions yet</p>";
         }
-        
-        for (const song of songs) {
+
+        for (const item of items) {
           if (
-            song.showers.includes(userId) ||
-            (!song.default_hidden && !song.hiders.includes(userId))
+            item.showers.includes(userId) ||
+            (!item.default_hidden && !item.hiders.includes(userId))
           ) {
-            const li = createSongLi(song, 1);
-            songList.appendChild(li);
+            const li = createItemLi(item, 1);
+            itemList.appendChild(li);
           }
         }
 
-        const songList2 = document.getElementById("songList2");
+        const itemList2 = document.getElementById("itemList2");
 
-        songList2.innerHTML = ""; // Clear the current list
+        itemList2.innerHTML = ""; // Clear the current list
 
-        let songList2Empty = true;
-        for (const song of songs) {
+        let itemList2Empty = true;
+        for (const item of items) {
           if (
-            song.hiders.includes(userId) ||
-            (song.default_hidden && !song.showers.includes(userId))
+            item.hiders.includes(userId) ||
+            (item.default_hidden && !item.showers.includes(userId))
           ) {
-            songList2Empty = false;
-            const li = createSongLi(song, 2); // let createSong know that this is list 2, styled differently
-            songList2.appendChild(li);
+            itemList2Empty = false;
+            const li = createItemLi(item, 2); // let createItemLi know that this is list 2, styled differently
+            itemList2.appendChild(li);
           }
         }
 
-        const songList2Label = document.getElementById("songList2Label");
-        if (songList2Empty === true) {
-          songList2Label.style.display = "none";
+        const itemList2Label = document.getElementById("itemList2Label");
+        if (itemList2Empty === true) {
+          itemList2Label.style.display = "none";
         } else {
-          songList2Label.style.display = "block";
+          itemList2Label.style.display = "block";
         }
 
-        return songs_changed_p;
+        return items_changed_p;
       }
 
-      async function pollSongList() {
+      async function pollItemList() {
         try {
-          // Pull down the new song list, storing whether anything changed
-          songs_changed_p = await updateSongList();
+          // Pull down the new item list, storing whether anything changed
+          items_changed_p = await updateItemList();
 
           const floor = currentFloor();
-          if (songs_changed_p) {
-            // the song list changed, poll again at the floor for quick updates
+          if (items_changed_p) {
+            // the item list changed, poll again at the floor for quick updates
             polling_wait = floor;
           } else {
             // Nothing changed, take longer to poll next time (but never below
@@ -533,14 +532,14 @@
           latencyFloor = Math.min(max_polling_wait, latencyFloor * 1.5);
           polling_wait = currentFloor();
         }
-        console.log(polling_wait, songs_changed_p, connected);
+        console.log(polling_wait, items_changed_p, connected);
         // Jitter (±15%) so hundreds of clients don't poll in lockstep, then
         // reschedule — always, so polling never silently dies.
         const jittered = polling_wait * (0.85 + Math.random() * 0.3);
-        setTimeout(pollSongList, jittered);
+        setTimeout(pollItemList, jittered);
       }
 
       // Apply the server-provided initial mode immediately (avoids a flash),
       // then start polling — which keeps the mode in sync as others vote.
       applyMode(currentMode);
-      pollSongList();
+      pollItemList();

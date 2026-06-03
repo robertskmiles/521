@@ -65,24 +65,24 @@ def generate_short_id(length=8):
 
 
 # In-memory storage
-songs = {'default':[]}
+items = {'default':[]}
 
-# Per-room state version, bumped on every mutation so /get_songs can answer
+# Per-room state version, bumped on every mutation so /get_items can answer
 # "nothing changed" cheaply. Clients send their last-seen version; if it still
 # matches we skip sorting + serializing the full list. Default 0 for new rooms.
 versions = {}
 
-def bump(jam_id):
-    versions[jam_id] = versions.get(jam_id, 0) + 1
+def bump(room_id):
+    versions[room_id] = versions.get(room_id, 0) + 1
 
-# Cache of the serialized /get_songs response per room: {jam_id: (version, body)}.
+# Cache of the serialized /get_items response per room: {room_id: (version, body)}.
 # The response is identical for every client at a given version (it carries only
 # room-global state), so we sort + serialize once per version bump and hand the
 # same JSON string to every poller. In a busy room this collapses N per-client
 # serializations into one, which is the dominant cost under load.
-song_response_cache = {}
+item_response_cache = {}
 
-# Per-room mode votes: {jam_id: {user_id: 'songs'|'questions'|'general'}}
+# Per-room mode votes: {room_id: {user_id: 'songs'|'questions'|'general'}}
 # A user who hasn't picked a mode sees the majority pick among those who have,
 # mirroring the no-central-authority hide/show voting (see update_default_hidden).
 mode_votes = {}
@@ -93,8 +93,8 @@ DEFAULT_MODE = 'questions'
 MODE_PRIORITY = ('songs', 'questions', 'general')
 
 
-def compute_mode(jam_id):
-    votes = mode_votes.get(jam_id, {})
+def compute_mode(room_id):
+    votes = mode_votes.get(room_id, {})
     if not votes:
         return DEFAULT_MODE
     counts = {mode: 0 for mode in VALID_MODES}
@@ -109,12 +109,11 @@ qr_cache_dir = os.path.join('static', 'qr')
 if not os.path.exists(qr_cache_dir):
   os.makedirs(qr_cache_dir)
 
-  
-@app.route('/<string:jam_id>')
+
+@app.route('/<string:room_id>')
 @app.route('/')
-def index(jam_id="default"):
+def index(room_id="default"):
     print(request.cookies)
-    # jam_id = request.args.get('jam_id', 'default')
     user_id = request.cookies.get('user_id')
     if not user_id:
         user_id = generate_short_id()
@@ -125,116 +124,116 @@ def index(jam_id="default"):
     # applies, same as picking it from the gear menu).
     requested_mode = request.args.get('mode')
     if requested_mode in VALID_MODES:
-        mode_votes.setdefault(jam_id, {})[user_id] = requested_mode
-        bump(jam_id)
+        mode_votes.setdefault(room_id, {})[user_id] = requested_mode
+        bump(room_id)
 
-    user_submitted_songs = [song['song'] for song in songs.get(jam_id, []) if user_id in song['submitters']]
+    user_submitted_items = [item['text'] for item in items.get(room_id, []) if user_id in item['submitters']]
 
-    response = make_response(render_template('index.html', jam_id=jam_id, songs=songs.get(jam_id, []), user_submitted_songs=user_submitted_songs, user_id=user_id, mode=compute_mode(jam_id)))
+    response = make_response(render_template('index.html', room_id=room_id, items=items.get(room_id, []), user_submitted_items=user_submitted_items, user_id=user_id, mode=compute_mode(room_id)))
     response.set_cookie('user_id', user_id, max_age=60*60*24)  # Set cookie to expire after 1 day
 
     return response
 
 @app.route('/submit', methods=['POST'])
-def submit_song():
-    jam_id = request.json.get('jam_id')
-    song_name = request.json.get('song')
+def submit():
+    room_id = request.json.get('room_id')
+    item_text = request.json.get('text')
     user_id = request.json.get('user_id')
-    
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
 
-    # Check if song already exists
-    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
+    # Check if this is a new room, make it if so
+    if not items.get(room_id, None):
+      items[room_id] = []
 
-    if song_entry:
-        if user_id not in song_entry['submitters']:
-            song_entry['submitters'].append(user_id)
+    # Check if item already exists
+    item_entry = next((item for item in items[room_id] if item['text'] == item_text), None)
+
+    if item_entry:
+        if user_id not in item_entry['submitters']:
+            item_entry['submitters'].append(user_id)
     else:
-        songs[jam_id].append({'song': song_name, 'submitters': [user_id], 'hiders':[], 'showers':[], 'default_hidden':False})
+        items[room_id].append({'text': item_text, 'submitters': [user_id], 'hiders':[], 'showers':[], 'default_hidden':False})
 
-    bump(jam_id)
+    bump(room_id)
     return jsonify({'status': 'success'})
 
 @app.route('/toggle', methods=['POST'])
-def toggle_song():
-    jam_id = request.json.get('jam_id')
-    song_name = request.json.get('song')
+def toggle():
+    room_id = request.json.get('room_id')
+    item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
-    print(user_id, "toggled", song_name)
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
+    print(user_id, "toggled", item_text)
+    # Check if this is a new room, make it if so
+    if not items.get(room_id, None):
+      items[room_id] = []
 
-    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
-    if song_entry:
-        if user_id in song_entry['submitters']:
-            song_entry['submitters'].remove(user_id)
+    item_entry = next((item for item in items[room_id] if item['text'] == item_text), None)
+    if item_entry:
+        if user_id in item_entry['submitters']:
+            item_entry['submitters'].remove(user_id)
         else:
-            song_entry['submitters'].append(user_id)
-        bump(jam_id)
+            item_entry['submitters'].append(user_id)
+        bump(room_id)
 
     return jsonify({'status': 'success'})
 
 
 @app.route('/hide', methods=['POST'])
-def hide_song():
-    jam_id = request.json.get('jam_id')
-    song_name = request.json.get('song')
+def hide():
+    room_id = request.json.get('room_id')
+    item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
-    print(user_id, "hid", song_name)
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
+    print(user_id, "hid", item_text)
+    # Check if this is a new room, make it if so
+    if not items.get(room_id, None):
+      items[room_id] = []
 
-    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
-    if song_entry:
-        if user_id not in song_entry['hiders']:
-            song_entry['hiders'].append(user_id)
-        if user_id in song_entry['showers']:
-            song_entry['showers'].remove(user_id)
-            
-    
-    update_default_hidden(jam_id, song_entry)
-    bump(jam_id)
+    item_entry = next((item for item in items[room_id] if item['text'] == item_text), None)
+    if item_entry:
+        if user_id not in item_entry['hiders']:
+            item_entry['hiders'].append(user_id)
+        if user_id in item_entry['showers']:
+            item_entry['showers'].remove(user_id)
+
+
+    update_default_hidden(room_id, item_entry)
+    bump(room_id)
     return jsonify({'status': 'success'})
 
 
 @app.route('/show', methods=['POST'])
-def show_song():
-    jam_id = request.json.get('jam_id')
-    song_name = request.json.get('song')
+def show():
+    room_id = request.json.get('room_id')
+    item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
-    print(user_id, "showed", song_name)
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
-      
-    song_entry = next((song for song in songs[jam_id] if song['song'] == song_name), None)
-    if song_entry:
-        if user_id not in song_entry['showers']:
-            song_entry['showers'].append(user_id)
-        if user_id in song_entry['hiders']:
-            song_entry['hiders'].remove(user_id)
-    
-    update_default_hidden(jam_id, song_entry)
-    bump(jam_id)
+    print(user_id, "showed", item_text)
+    # Check if this is a new room, make it if so
+    if not items.get(room_id, None):
+      items[room_id] = []
+
+    item_entry = next((item for item in items[room_id] if item['text'] == item_text), None)
+    if item_entry:
+        if user_id not in item_entry['showers']:
+            item_entry['showers'].append(user_id)
+        if user_id in item_entry['hiders']:
+            item_entry['hiders'].remove(user_id)
+
+    update_default_hidden(room_id, item_entry)
+    bump(room_id)
     return jsonify({'status': 'success'})
 
-def update_default_hidden(jam_id, song_entry):
-    # Check if this is a new jam, make it if so
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
+def update_default_hidden(room_id, item_entry):
+    # Check if this is a new room, make it if so
+    if not items.get(room_id, None):
+      items[room_id] = []
 
     # Create a set to store unique user IDs
     unique_users = set()
 
     # Loop through each dictionary and add unique user IDs to the set
-    for entry in songs[jam_id]:
+    for entry in items[room_id]:
         unique_users.update(entry['hiders'])
         unique_users.update(entry['showers'])
         unique_users.update(entry['submitters'])
@@ -242,69 +241,69 @@ def update_default_hidden(jam_id, song_entry):
     # Get the total count of unique users
     user_count = len(unique_users)
 
-    # Decide whether to show this song by deault
-    hiders = len(song_entry['hiders'])
-    showers = len(song_entry['showers'])
+    # Decide whether to show this item by default
+    hiders = len(item_entry['hiders'])
+    showers = len(item_entry['showers'])
 
     # if most people have hidden it
     # (and hardly anyone has unhidden it)
     # then hide it by default for everyone
     if (hiders > (user_count // 2) and (showers <= (user_count // 3))):
-      song_entry['default_hidden'] = True
+      item_entry['default_hidden'] = True
     else:
-      song_entry['default_hidden'] = False
+      item_entry['default_hidden'] = False
 
-      
+
 @app.route('/set_mode', methods=['POST'])
 def set_mode():
-    jam_id = request.json.get('jam_id')
+    room_id = request.json.get('room_id')
     user_id = request.json.get('user_id')
     mode = request.json.get('mode')
 
     if mode not in VALID_MODES:
         return jsonify({'status': 'error', 'message': 'invalid mode'}), 400
 
-    print(user_id, "voted mode", mode, "in", jam_id)
-    mode_votes.setdefault(jam_id, {})[user_id] = mode
-    bump(jam_id)
+    print(user_id, "voted mode", mode, "in", room_id)
+    mode_votes.setdefault(room_id, {})[user_id] = mode
+    bump(room_id)
 
     # Return the new effective mode (may differ from the user's pick if outvoted).
-    return jsonify({'status': 'success', 'mode': compute_mode(jam_id)})
+    return jsonify({'status': 'success', 'mode': compute_mode(room_id)})
 
 
-@app.route('/get_songs', methods=['GET'])
-def get_songs():
-    jam_id = request.args.get('jam_id', 'default')
-    if not songs.get(jam_id, None):
-      songs[jam_id] = []
+@app.route('/get_items', methods=['GET'])
+def get_items():
+    room_id = request.args.get('room_id', 'default')
+    if not items.get(room_id, None):
+      items[room_id] = []
 
     # Conditional poll: if the client's last-seen version still matches, nothing
     # changed, so return a tiny response and skip the sort + full serialization.
     client_v = request.args.get('v', type=int)
-    current_v = versions.get(jam_id, 0)
+    current_v = versions.get(room_id, 0)
     if client_v is not None and client_v == current_v:
       return jsonify({'changed': False, 'version': current_v, 'poll_after': suggested_poll_ms()})
 
-    # Cache the expensive part (the sorted, serialized song list) per version, so
+    # Cache the expensive part (the sorted, serialized item list) per version, so
     # we sort + serialize once per change and reuse it for every other poller.
     # The small wrapper -- including the live `poll_after` hint -- is composed
     # cheaply per request so the rate guidance stays fresh.
-    cached = song_response_cache.get(jam_id)
+    cached = item_response_cache.get(room_id)
     if cached is None or cached[0] != current_v:
-        sorted_songs = sorted(songs[jam_id], key=lambda x: len(x['submitters']), reverse=True)
-        songs_json = json.dumps(sorted_songs)
-        song_response_cache[jam_id] = (current_v, songs_json)
+        sorted_items = sorted(items[room_id], key=lambda x: len(x['submitters']), reverse=True)
+        items_json = json.dumps(sorted_items)
+        item_response_cache[room_id] = (current_v, items_json)
     else:
-        songs_json = cached[1]
-    body = '{"changed": true, "version": %d, "mode": %s, "poll_after": %d, "songs": %s}' % (
-        current_v, json.dumps(compute_mode(jam_id)), suggested_poll_ms(), songs_json)
+        items_json = cached[1]
+    body = '{"changed": true, "version": %d, "mode": %s, "poll_after": %d, "items": %s}' % (
+        current_v, json.dumps(compute_mode(room_id)), suggested_poll_ms(), items_json)
     return app.response_class(body, mimetype='application/json')
 
-@app.route('/qr/<string:jam_id>.png')
-def generate_qr(jam_id):
+@app.route('/qr/<string:room_id>.png')
+def generate_qr(room_id):
     # Create the QR code URL from the live host, so it works on any domain
-    url = request.host_url + jam_id
-    qr_filename = '{}.png'.format(jam_id)
+    url = request.host_url + room_id
+    qr_filename = '{}.png'.format(room_id)
     qr_filepath = os.path.join(qr_cache_dir, qr_filename)
 
     # Check if the file already exists
@@ -318,7 +317,6 @@ def generate_qr(jam_id):
         return send_file(qr_filepath, mimetype='image/png')
     except Exception as e:
         abort(404)
-  
+
 if __name__ == '__main__':
     app.run(debug=True)
- 
