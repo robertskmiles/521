@@ -30,7 +30,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # ---------------------------------------------------------------------------
 RATE_BUDGET = 75            # target req/s, ~60% of the ceiling (leaves headroom)
 POLL_MIN_MS = 1000          # snappy floor when load is low
-POLL_MAX_MS = 8000          # never back clients off further than this
+POLL_MAX_MS = 15000         # never back clients off further than this
 _req_times = deque()        # monotonic timestamps of recent requests (1s window)
 _suggested_ms = POLL_MIN_MS
 _last_adjust = 0.0
