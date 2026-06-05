@@ -298,18 +298,15 @@ button:hover {
 
 .mode-noun {
     cursor: pointer;
-    text-decoration: underline dotted;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
-    /* Faded underline at rest so it's a quiet hint, not a distraction; it firms
-       up (solid + full colour) on hover. */
-    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
-    transition: text-decoration-color 0.15s ease;
+    /* No resting indication that it's clickable; the underline only appears on
+       hover. */
+    text-decoration: none;
 }
 
 .mode-noun:hover {
-    text-decoration-style: solid;
-    text-decoration-color: currentColor;
+    text-decoration: underline solid;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
 }
 
 /* Hide (but keep the space for) the trigger word while the menu is open; the
