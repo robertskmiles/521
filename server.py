@@ -64,6 +64,13 @@ def generate_short_id(length=8):
     return ''.join(random.choice(chars) for _ in range(length))
 
 
+# Rooms are case-insensitive: /ClaudeCode and /claudecode are the same room.
+# All in-memory state is keyed by the lowercased name; the original casing the
+# visitor typed is only used for display (page title, URL subtitle, QR).
+def room_key(room_id):
+    return (room_id or 'default').lower()
+
+
 # In-memory storage
 items = {'default':[]}
 
@@ -129,21 +136,24 @@ def index(room_id="default"):
     # letspick.onrender.com/myroom?mode=songs drops the recipient straight into
     # that mode (it wins outright in a fresh room; otherwise the majority still
     # applies, same as picking it from the gear menu).
+    # Display the name as typed, but key all state by its lowercased form.
+    key = room_key(room_id)
+
     requested_mode = request.args.get('mode')
     if requested_mode in VALID_MODES:
-        mode_votes.setdefault(room_id, {})[user_id] = requested_mode
-        bump(room_id)
+        mode_votes.setdefault(key, {})[user_id] = requested_mode
+        bump(key)
 
-    user_submitted_items = [item['text'] for item in items.get(room_id, []) if user_id in item['submitters']]
+    user_submitted_items = [item['text'] for item in items.get(key, []) if user_id in item['submitters']]
 
-    response = make_response(render_template('index.html', room_id=room_id, items=items.get(room_id, []), user_submitted_items=user_submitted_items, user_id=user_id, mode=compute_mode(room_id, user_id)))
+    response = make_response(render_template('index.html', room_id=room_id, items=items.get(key, []), user_submitted_items=user_submitted_items, user_id=user_id, mode=compute_mode(key, user_id)))
     response.set_cookie('user_id', user_id, max_age=60*60*24)  # Set cookie to expire after 1 day
 
     return response
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    room_id = request.json.get('room_id')
+    room_id = room_key(request.json.get('room_id'))
     item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
@@ -165,7 +175,7 @@ def submit():
 
 @app.route('/toggle', methods=['POST'])
 def toggle():
-    room_id = request.json.get('room_id')
+    room_id = room_key(request.json.get('room_id'))
     item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
@@ -187,7 +197,7 @@ def toggle():
 
 @app.route('/hide', methods=['POST'])
 def hide():
-    room_id = request.json.get('room_id')
+    room_id = room_key(request.json.get('room_id'))
     item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
@@ -211,7 +221,7 @@ def hide():
 
 @app.route('/show', methods=['POST'])
 def show():
-    room_id = request.json.get('room_id')
+    room_id = room_key(request.json.get('room_id'))
     item_text = request.json.get('text')
     user_id = request.json.get('user_id')
 
@@ -263,7 +273,7 @@ def update_default_hidden(room_id, item_entry):
 
 @app.route('/set_mode', methods=['POST'])
 def set_mode():
-    room_id = request.json.get('room_id')
+    room_id = room_key(request.json.get('room_id'))
     user_id = request.json.get('user_id')
     mode = request.json.get('mode')
 
@@ -280,7 +290,7 @@ def set_mode():
 
 @app.route('/get_items', methods=['GET'])
 def get_items():
-    room_id = request.args.get('room_id', 'default')
+    room_id = room_key(request.args.get('room_id', 'default'))
     # The mode is per-viewer (you see your own pick), so we need to know who's
     # asking; the cookie is set on the initial page load.
     user_id = request.cookies.get('user_id')
