@@ -34,7 +34,7 @@
     </div>
 
     <h1 id="heading">{{ {'songs': "Let's Pick a song", 'questions': "Let's Pick a question"}.get(mode, "Let's Pick a thing") }}</h1>
-    <h2>{{ request.host }}/{{room_id}}</h2>
+    <h2><a id="roomUrl" href="//{{ request.host }}/{{room_id}}">{{ request.host }}/<strong>{{room_id}}</strong></a></h2>
 <br/>
     <div id="submitform">
       <textarea id="itemInput" rows="1" placeholder="Type a suggestion here"></textarea>

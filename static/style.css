@@ -108,8 +108,21 @@ h1 {
 h2 {
     font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 400;
     word-break: break-all;
+}
+
+/* The room/url subtitle is a link to itself (easy to copy); it only hints that
+   it's a link by underlining on hover, and the room name itself is bolded. */
+h2 a#roomUrl {
+    color: inherit;
+    text-decoration: none;
+}
+h2 a#roomUrl:hover {
+    text-decoration: underline;
+}
+h2 a#roomUrl strong {
+    font-weight: 700;
 }
 
 label, input, button {
