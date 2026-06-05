@@ -19,7 +19,7 @@
         songs: {
           heading: "Let's Pick a song",
           noun: "song",
-          titleWord: "songs",
+          titleWord: "Songs",
           placeholder: "Type a song here",
           likePrompt: "Check the box for each you like:",
           completed: "Already Played:",
@@ -31,7 +31,7 @@
         questions: {
           heading: "Let's Pick a question",
           noun: "question",
-          titleWord: "questions",
+          titleWord: "Questions",
           placeholder: "Type your question here",
           likePrompt: "Check the box for each you'd like asked:",
           completed: "Already Asked:",
