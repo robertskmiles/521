@@ -7,6 +7,7 @@
         general: {
           heading: "Let's Pick a thing",
           noun: "thing",
+          titleWord: "",
           placeholder: "Type a suggestion here",
           likePrompt: "Check the box for each you like:",
           completed: "Done:",
@@ -18,6 +19,7 @@
         songs: {
           heading: "Let's Pick a song",
           noun: "song",
+          titleWord: "songs",
           placeholder: "Type a song here",
           likePrompt: "Check the box for each you like:",
           completed: "Already Played:",
@@ -29,6 +31,7 @@
         questions: {
           heading: "Let's Pick a question",
           noun: "question",
+          titleWord: "questions",
           placeholder: "Type your question here",
           likePrompt: "Check the box for each you'd like asked:",
           completed: "Already Asked:",
@@ -191,6 +194,12 @@
         const cfg = MODES[mode];
 
         document.body.className = "mode-" + mode;
+
+        // Page title reflects the room and mode, e.g. "myjam songs - Let's Pick"
+        // or "AI2027 Questions - Let's Pick"; general mode omits the mode word
+        // ("FridayDinner - Let's Pick").
+        const titlePrefix = [getRoomId(), cfg.titleWord].filter(Boolean).join(" ");
+        document.title = titlePrefix ? titlePrefix + " - Let's Pick" : "Let's Pick";
 
         // Favicon is a checked checkbox tinted with the mode's accent colour.
         const favicon = document.getElementById("favicon");
