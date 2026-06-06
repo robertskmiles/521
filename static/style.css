@@ -17,6 +17,8 @@ body            { --accent: #607d8b; --accent-dark: #4b626e; } /* fallback */
 body.mode-general   { --accent: #607d8b; --accent-dark: #4b626e; } /* slate */
 body.mode-songs     { --accent: #4a90e2; --accent-dark: #357ab7; } /* blue  */
 body.mode-questions { --accent: #8f2f46; --accent-dark: #b64a62; } /* wine (Manifest/Waypoint conference theme — see end of file) */
+body.mode-person    { --accent: #c0473b; --accent-dark: #9a382e; } /* brick red */
+body.mode-place     { --accent: #4a9d6e; --accent-dark: #3a7d57; } /* forest green */
 
 
 /* Base (mobile): QR sits full-width in normal flow, as before. No zoom affordance. */

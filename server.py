@@ -95,7 +95,7 @@ item_response_cache = {}
 # consensus (plurality) among those who have.
 mode_votes = {}
 
-VALID_MODES = ('songs', 'questions', 'general')
+VALID_MODES = ('songs', 'questions', 'general', 'person', 'place')
 DEFAULT_MODE = 'questions'
 # Tie-break priority when vote counts are equal (first listed wins):
 MODE_PRIORITY = ('songs', 'questions', 'general')

@@ -5,8 +5,8 @@
       // differs between the songs / questions / general modes.
       const MODES = {
         general: {
-          heading: "Let's Pick a thing",
-          noun: "thing",
+          heading: "Let's Pick a Thing",
+          noun: "Thing",
           titleWord: "",
           placeholder: "Type a suggestion here",
           likePrompt: "Check the box for each you like:",
@@ -17,8 +17,8 @@
           links: false, multiline: false,
         },
         songs: {
-          heading: "Let's Pick a song",
-          noun: "song",
+          heading: "Let's Pick a Song",
+          noun: "Song",
           titleWord: "Songs",
           placeholder: "Type a song here",
           likePrompt: "Check the box for each you like:",
@@ -29,8 +29,8 @@
           links: true, multiline: false,
         },
         questions: {
-          heading: "Let's Pick a question",
-          noun: "question",
+          heading: "Let's Pick a Question",
+          noun: "Question",
           titleWord: "Questions",
           placeholder: "Type your question here",
           likePrompt: "Check the box for each you'd like asked:",
@@ -39,6 +39,30 @@
           markUndone: "Mark as not asked",
           unit1: "vote", unitN: "votes",
           links: false, multiline: true,
+        },
+        person: {
+          heading: "Let's Pick a Person",
+          noun: "Person",
+          titleWord: "People",
+          placeholder: "Type a suggestion here",
+          likePrompt: "Check the box for each you'd pick:",
+          completed: "Already Picked:",
+          markDone: "Mark as picked",
+          markUndone: "Mark as not picked",
+          unit1: "vote", unitN: "votes",
+          links: false, multiline: false,
+        },
+        place: {
+          heading: "Let's Pick a Place",
+          noun: "Place",
+          titleWord: "Places",
+          placeholder: "Type a suggestion here",
+          likePrompt: "Check the box for each you'd pick:",
+          completed: "Already Picked:",
+          markDone: "Mark as picked",
+          markUndone: "Mark as not picked",
+          unit1: "vote", unitN: "votes",
+          links: false, multiline: false,
         },
       };
       let currentMode = window.initialMode in MODES ? window.initialMode : "general";
@@ -164,7 +188,7 @@
         list.className = "noun-menu-list";
         // Current mode first so its item lands where the trigger word already is;
         // then the rest in a stable order so the menu never reshuffles.
-        const order = [mode, ...["general", "songs", "questions"].filter((m) => m !== mode)];
+        const order = [mode, ...["general", "songs", "questions", "person", "place"].filter((m) => m !== mode)];
         for (const m of order) {
           const li = document.createElement("li");
           const btn = document.createElement("button");

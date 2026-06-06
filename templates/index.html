@@ -30,10 +30,12 @@
         <li><button type="button" data-mode="general" onclick="setMode('general')">Anything</button></li>
         <li><button type="button" data-mode="songs" onclick="setMode('songs')">Songs</button></li>
         <li><button type="button" data-mode="questions" onclick="setMode('questions')">Questions</button></li>
+        <li><button type="button" data-mode="person" onclick="setMode('person')">People</button></li>
+        <li><button type="button" data-mode="place" onclick="setMode('place')">Places</button></li>
       </ul>
     </div>
 
-    <h1 id="heading">{{ {'songs': "Let's Pick a song", 'questions': "Let's Pick a question"}.get(mode, "Let's Pick a thing") }}</h1>
+    <h1 id="heading">{{ {'songs': "Let's Pick a Song", 'questions': "Let's Pick a Question", 'person': "Let's Pick a Person", 'place': "Let's Pick a Place"}.get(mode, "Let's Pick a Thing") }}</h1>
     <h2><a id="roomUrl" href="//{{ request.host }}/{{room_id}}">{{ request.host }}/<strong>{{room_id}}</strong></a></h2>
 <br/>
     <div id="submitform">
