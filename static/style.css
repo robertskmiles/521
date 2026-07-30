@@ -16,7 +16,7 @@ input, textarea, button, select {
 body            { --accent: #607d8b; --accent-dark: #4b626e; } /* fallback */
 body.mode-general   { --accent: #607d8b; --accent-dark: #4b626e; } /* slate */
 body.mode-songs     { --accent: #4a90e2; --accent-dark: #357ab7; } /* blue  */
-body.mode-questions { --accent: #8f2f46; --accent-dark: #b64a62; } /* wine (Manifest/Waypoint conference theme — see end of file) */
+body.mode-questions { --accent: #8f2f46; --accent-dark: #b64a62; } /* wine (kept from the retired conference theme — backup in static/backups/) */
 body.mode-person    { --accent: #c0473b; --accent-dark: #9a382e; } /* brick red */
 body.mode-place     { --accent: #4a9d6e; --accent-dark: #3a7d57; } /* forest green */
 
@@ -500,131 +500,6 @@ input[type="checkbox"] {
     text-decoration-color: #333333;  /* Underline darkens on hover */
 }
 
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Questions mode: match the "look and feel" of the Manifest/Waypoint
-   conference webapp (waypoint.lighthaven.space). Warm paper background,
-   Source Serif 4 display headings, Karla body text, a wine accent, and
-   rounded panels with soft shadows. Everything is scoped to
-   body.mode-questions so the songs/general modes are untouched.
-   ───────────────────────────────────────────────────────────────────────── */
-body.mode-questions {
-    --q-paper: #fffcf6;     /* panel / surface  */
-    --q-ink: #1a1816;       /* primary text     */
-    --q-muted: #6f625c;     /* secondary text   */
-    --q-line: #3d231438;    /* hairline borders */
-    --q-shadow: 0 4px 16px #311f152e;
-    background: linear-gradient(180deg, #f4efe5 0%, #ebe2d3 100%) fixed;
-    color: var(--q-ink);
-    font-family: "Karla", ui-sans-serif, system-ui, sans-serif;
-}
-
-/* Serif display heading, dark ink (the accent is reserved for interactive bits) */
-body.mode-questions h1#heading {
-    font-family: "Source Serif 4", ui-serif, Georgia, serif;
-    font-weight: 600;
-    color: var(--q-ink);
-    letter-spacing: -0.01em;
-}
-
-/* room/url subtitle: quiet, but keep it large and monospace (see base h2) */
-body.mode-questions h2 {
-    color: var(--q-muted);
-}
-
-body.mode-questions #likePrompt {
-    color: var(--q-muted);
-}
-
-/* "Asked:" rendered as a small uppercase tracked label, like the
-   conference's "SESSION IDEA" eyebrow text */
-body.mode-questions #itemList2Label p {
-    color: var(--q-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-/* paper panels: the suggestion box + the suggestion cards */
-body.mode-questions #submitform {
-    background: var(--q-paper);
-    border-color: #bdb2a2;   /* warm tan line, matching the conference box */
-    box-shadow: var(--q-shadow);
-}
-
-body.mode-questions #itemInput::placeholder {
-    color: var(--q-muted);
-}
-
-body.mode-questions li {
-    background: var(--q-paper);
-    border: 1px solid var(--q-line);
-    border-radius: 14px;
-    box-shadow: var(--q-shadow);
-}
-
-/* secondary text muted, the question text itself ink */
-body.mode-questions li span,
-body.mode-questions .count-span {
-    color: var(--q-muted);
-}
-body.mode-questions li > span:first-child {
-    color: var(--q-ink);
-}
-
-body.mode-questions .hide-item-link {
-    color: var(--q-muted);
-}
-body.mode-questions .hide-item-link:hover {
-    color: var(--accent);
-}
-
-/* gear dropdown on paper */
-body.mode-questions #modeMenuList {
-    background: var(--q-paper);
-    border-color: var(--q-line);
-    border-radius: 12px;
-    box-shadow: var(--q-shadow);
-}
-body.mode-questions #modeMenuList button {
-    color: var(--q-ink);
-}
-body.mode-questions #modeMenuList button:hover {
-    background: #852f4014;  /* accent wash */
-    color: var(--q-ink);
-}
-
-/* Title-noun dropdown on paper. The heading word here is ink-coloured serif
-   (the h1 sets that and the items inherit the font), so the items use ink too —
-   keeping the seamless "word expanded into a list" look. */
-body.mode-questions .noun-menu-list {
-    background: var(--q-paper);
-    box-shadow: var(--q-shadow);
-}
-/* The general `body.mode-questions li` paper-card rule (border + radius +
-   shadow) is more specific than the base .noun-menu-list li reset, so it gives
-   each menu item its own little rectangle. Override it back to flat here. */
-body.mode-questions .noun-menu-list li {
-    background: none;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-}
-body.mode-questions .noun-menu-list button {
-    color: var(--q-ink);
-}
-body.mode-questions .noun-menu-list button:hover {
-    color: var(--accent);  /* wine on hover */
-}
-
-body.mode-questions .footer {
-    background: transparent;
-    border-top: 1px solid var(--q-line);
-}
-body.mode-questions .footer p {
-    color: var(--q-muted);
-}
 
 /* ─────────────────────────────────────────────────────────────────────────
    Desktop layout overrides for the top-right QR. Kept at the end of the file

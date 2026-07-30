@@ -300,8 +300,7 @@
         wrap.style.setProperty("--qr-top", Math.round(center - size / 2) + "px");
       }
 
-      // Keep the QR placement correct as the viewport changes or web fonts load
-      // (the questions-mode serif heading changes height once it arrives).
+      // Keep the QR placement correct as the viewport changes or web fonts load.
       window.addEventListener("resize", layoutQr);
       window.addEventListener("load", layoutQr);
       if (document.fonts && document.fonts.ready) {
